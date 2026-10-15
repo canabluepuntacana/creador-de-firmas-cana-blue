@@ -24,28 +24,34 @@ const state = {
 const BRAND = { instagram: '#000000', whatsapp: '#25D366', linkedin: '#0A66C2' };
 // Logo picker for extra links: official-style white glyph on brand color (email-safe PNG)
 const NETWORKS = {
-  facebook: { label: 'Facebook', bg: '#1877F2', slug: 'facebook--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/facebook--v1.png' },
-  instagram: { label: 'Instagram', bg: '#000000', slug: 'instagram-new--v1', img: 'https://img.icons8.com/material-outlined/48/ffffff/instagram-new--v1.png' },
-  whatsapp: { label: 'WhatsApp', bg: '#25D366', slug: 'whatsapp--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/whatsapp--v1.png' },
-  linkedin: { label: 'LinkedIn', bg: '#0A66C2', slug: 'linkedin--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/linkedin--v1.png' },
-  x: { label: 'X (Twitter)', bg: '#000000', slug: 'twitterx--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/twitterx--v1.png' },
-  tiktok: { label: 'TikTok', bg: '#000000', slug: 'tiktok--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/tiktok--v1.png' },
-  youtube: { label: 'YouTube', bg: '#FF0000', slug: 'youtube--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/youtube--v1.png' },
-  telegram: { label: 'Telegram', bg: '#229ED9', slug: 'telegram-app--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/telegram-app--v1.png' },
-  pinterest: { label: 'Pinterest', bg: '#E60023', slug: 'pinterest--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/pinterest--v1.png' },
-  website: { label: 'Website / custom link', bg: '#174176', slug: 'link--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/link--v1.png' }
+  facebook: { label: 'Facebook', bg: '#1877F2', slug: 'facebook-f', img: 'https://img.icons8.com/material-outlined/48/ffffff/facebook-f.png' },
+  instagram: { label: 'Instagram', bg: '#000000', slug: 'instagram', img: 'https://img.icons8.com/material-outlined/48/ffffff/instagram.png' },
+  whatsapp: { label: 'WhatsApp', bg: '#25D366', slug: 'whatsapp', img: 'https://img.icons8.com/material-outlined/48/ffffff/whatsapp.png' },
+  linkedin: { label: 'LinkedIn', bg: '#0A66C2', slug: 'linkedin', img: 'https://img.icons8.com/material-outlined/48/ffffff/linkedin.png' },
+  x: { label: 'X (Twitter)', bg: '#000000', slug: 'twitterx', img: 'https://img.icons8.com/material-outlined/48/ffffff/twitterx.png' },
+  tiktok: { label: 'TikTok', bg: '#000000', slug: 'tiktok', img: 'https://img.icons8.com/material-outlined/48/ffffff/tiktok.png' },
+  youtube: { label: 'YouTube', bg: '#FF0000', slug: 'youtube-play', img: 'https://img.icons8.com/material-outlined/48/ffffff/youtube-play.png' },
+  telegram: { label: 'Telegram', bg: '#229ED9', slug: 'telegram-app', img: 'https://img.icons8.com/material-outlined/48/ffffff/telegram-app.png' },
+  pinterest: { label: 'Pinterest', bg: '#E60023', slug: 'pinterest', img: 'https://img.icons8.com/material-outlined/48/ffffff/pinterest.png' },
+  website: { label: 'Website / custom link', bg: '#174176', slug: 'link', img: 'https://img.icons8.com/material-outlined/48/ffffff/link.png' }
 };
 function networkGlyph(n, hex) {
-  return `https://img.icons8.com/ios-filled/50/${hex}/${n.slug}.png`;
+  return `https://img.icons8.com/material-outlined/48/${hex}/${n.slug}.png`;
 }
 // Extra-link button in 3 shapes: circle (solid) / square (solid) / outline (line only, no fill)
-// Global social icon style (solid / outline / plain), always in official brand colors
+// Global social icon style (solid / rounded / outline / frame / line / soft),
+// always in official brand colors. Glyphs are thick official-style line logos.
 function socialIcon(url, key, style, c) {
   const n = NETWORKS[key] || NETWORKS.website;
   const bg = key === 'website' ? c : (n.bg || c);
   const hex = bg.charAt(0) === '#' ? bg.slice(1) : bg;
-  if (style === 'outline') return `<a href="${url}" target="_blank" style="display:inline-block;width:26px;height:26px;border-radius:50%;border:1px solid ${bg};background-color:transparent;text-align:center;vertical-align:middle;"><img src="${networkGlyph(n, hex)}" width="14" height="14" alt="${n.label}" style="display:inline-block;width:14px;height:14px;margin-top:6px;border:0;"></a>`;
-  if (style === 'plain') return `<a href="${url}" target="_blank" style="display:inline-block;vertical-align:middle;"><img src="${networkGlyph(n, hex)}" width="22" height="22" alt="${n.label}" style="display:inline-block;width:22px;height:22px;border:0;"></a>`;
+  const box = 'display:inline-block;text-align:center;vertical-align:middle;';
+  const im = (src, s, mt) => `<img src="${src}" width="${s}" height="${s}" alt="${n.label}" style="display:inline-block;width:${s}px;height:${s}px;margin-top:${mt}px;border:0;">`;
+  if (style === 'rounded') return `<a href="${url}" target="_blank" style="${box}width:28px;height:28px;border-radius:8px;background-color:${bg};">${im(n.img, 15, 6)}</a>`;
+  if (style === 'outline') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:50%;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), 14, 6)}</a>`;
+  if (style === 'frame') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:8px;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), 14, 6)}</a>`;
+  if (style === 'line') return `<a href="${url}" target="_blank" style="${box}">${im(networkGlyph(n, hex), 24, 0)}</a>`;
+  if (style === 'soft') return `<a href="${url}" target="_blank" style="${box}width:28px;height:28px;border-radius:50%;background-color:${hexA(bg, .14)};">${im(networkGlyph(n, hex), 15, 6)}</a>`;
   return socialBtn(url, bg, n.img, n.label);
 }
 function extraBtn(e, c, style) { return socialIcon(e.url, e.icon, style || 'solid', c); }
@@ -326,7 +332,7 @@ function iconPicker(selected, onPick) {
   return wrap;
 }
 function setIconStyle(s) {
-  state.iconStyle = (s === 'outline' || s === 'plain') ? s : 'solid';
+  state.iconStyle = ['solid', 'rounded', 'outline', 'frame', 'line', 'soft'].includes(s) ? s : 'solid';
   document.querySelectorAll('#iconStyleSeg button').forEach(b => b.classList.toggle('on', b.dataset.s === state.iconStyle));
 }
 function addLinkRow(icon = 'facebook', url = '') {
@@ -389,7 +395,7 @@ async function loadSheetAgents(id) {
       instagram: o.instagram || '', whatsapp: o.whatsapp || '',
       foto: o.foto || '', logo: o.logo || '',
       certs: { crs: B(o.crs), aei: B(o.aei), realtor: B(o.realtor), sr23: B(o.sr23), sr24: B(o.sr24), lux: o.lux == null ? true : B(o.lux) },
-      iconStyle: ['solid', 'outline', 'plain'].includes(String(o.iconstyle || '').toLowerCase()) ? String(o.iconstyle).toLowerCase() : 'solid'
+      iconStyle: ['solid', 'rounded', 'outline', 'frame', 'line', 'soft'].includes(String(o.iconstyle || '').toLowerCase()) ? String(o.iconstyle).toLowerCase() : 'solid'
     };
   }).filter(a => a.name);
 }

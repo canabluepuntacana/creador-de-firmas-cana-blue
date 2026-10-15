@@ -108,6 +108,9 @@ textarea{resize:vertical}
 .seg .sv-solid{background:#174176}
 .seg .sv-outline{border:2px solid #174176}
 .seg .sv-plain{background:#174176;border-radius:4px}
+.seg6{display:grid;grid-template-columns:1fr 1fr 1fr}
+.seg .demo{width:22px;height:22px;flex:none;display:inline-flex;align-items:center;justify-content:center}
+.seg .demo img{width:13px;height:13px;display:block}
 .xlink button{border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer}
 .preview-col{min-width:0}
 .preview-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
