@@ -20,9 +20,12 @@ body{margin:0;font-family:"Google Sans","Product Sans","Segoe UI",Arial,Helvetic
 .layout{display:grid;grid-template-columns:68px 400px 1fr;gap:16px;padding:16px;max-width:1420px;margin:0 auto}
 .rail{position:sticky;top:90px;align-self:start;background:#fff;border:1px solid var(--line);border-radius:28px;padding:10px 5px;display:flex;flex-direction:column;gap:4px;box-shadow:0 6px 20px rgba(13,27,51,.08);max-height:calc(100vh - 110px);overflow:auto}
 .rail button{border:0;background:transparent;border-radius:18px;padding:8px 1px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#5b6b84;font-size:9px;font-weight:600;font-family:inherit}
-.rail button:hover{background:#f1f5fa}
-.rail button.on{background:#eef3fb;color:var(--primary)}
+.rail button:hover{color:var(--primary)}
+.rail button.on{background:transparent;color:var(--primary)}
 .editor{display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 90px);overflow:auto;padding-right:4px}
+/* Slim invisible scrollbars: scrolling still works, no visible track/thumb */
+.rail,.editor,.ipick-menu,.agent-list,.preview-box,pre{scrollbar-width:none;-ms-overflow-style:none}
+.rail::-webkit-scrollbar,.editor::-webkit-scrollbar,.ipick-menu::-webkit-scrollbar,.agent-list::-webkit-scrollbar,.preview-box::-webkit-scrollbar,pre::-webkit-scrollbar{width:0;height:0;display:none}
 .editor .card{display:none}
 .editor .card.show{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px}

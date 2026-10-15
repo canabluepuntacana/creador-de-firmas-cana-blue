@@ -327,6 +327,13 @@ function placeFixed(menu, anchor, minW) {
 function hideFloatMenus() {
   document.querySelectorAll('.ipick-menu,.agent-list').forEach(m => m.classList.add('hidden'));
 }
+// Scrolling inside a floating menu must not close it (only scrolls from the
+// page / editor behind it do), so the list stays open while browsing logos.
+function onFloatScroll(e) {
+  const t = e.target;
+  if (t && t.nodeType === 1 && (t.closest('.ipick-menu') || t.closest('.agent-list'))) return;
+  hideFloatMenus();
+}
 function iconPicker(selected, onPick) {
   const wrap = document.createElement('div'); wrap.className = 'ipick';
   const paint = k => {
@@ -350,7 +357,7 @@ function iconPicker(selected, onPick) {
   menu.querySelectorAll('.ipick-item').forEach(it => it.onclick = e => {
     e.stopPropagation(); paint(it.dataset.k); menu.classList.add('hidden'); onPick(it.dataset.k);
   });
-  if (!ipickBound) { ipickBound = true; document.addEventListener('click', hideFloatMenus); document.addEventListener('scroll', hideFloatMenus, true); window.addEventListener('resize', hideFloatMenus); }
+  if (!ipickBound) { ipickBound = true; document.addEventListener('click', hideFloatMenus); document.addEventListener('scroll', onFloatScroll, true); window.addEventListener('resize', hideFloatMenus); }
   return wrap;
 }
 function setCertsAlign(a) {
