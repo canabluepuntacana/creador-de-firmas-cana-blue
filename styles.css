@@ -17,9 +17,9 @@ body{margin:0;font-family:"Google Sans","Product Sans","Segoe UI",Arial,Helvetic
 .btn.small{padding:6px 10px;font-size:12.5px}
 .btn.dashed{border-style:dashed;width:100%;justify-content:center;color:var(--primary)}
 .btn:hover{filter:brightness(.96)}
-.layout{display:grid;grid-template-columns:86px 400px 1fr;gap:16px;padding:16px;max-width:1420px;margin:0 auto}
-.rail{position:sticky;top:90px;align-self:start;background:#fff;border:1px solid var(--line);border-radius:20px;padding:10px 6px;display:flex;flex-direction:column;gap:4px;box-shadow:0 6px 20px rgba(13,27,51,.08);max-height:calc(100vh - 110px);overflow:auto}
-.rail button{border:0;background:transparent;border-radius:14px;padding:9px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:#5b6b84;font-size:10px;font-weight:600;font-family:inherit}
+.layout{display:grid;grid-template-columns:68px 400px 1fr;gap:16px;padding:16px;max-width:1420px;margin:0 auto}
+.rail{position:sticky;top:90px;align-self:start;background:#fff;border:1px solid var(--line);border-radius:28px;padding:10px 5px;display:flex;flex-direction:column;gap:4px;box-shadow:0 6px 20px rgba(13,27,51,.08);max-height:calc(100vh - 110px);overflow:auto}
+.rail button{border:0;background:transparent;border-radius:18px;padding:8px 1px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#5b6b84;font-size:9px;font-weight:600;font-family:inherit}
 .rail button:hover{background:#f1f5fa}
 .rail button.on{background:#eef3fb;color:var(--primary)}
 .editor{display:flex;flex-direction:column;gap:12px;max-height:calc(100vh - 90px);overflow:auto;padding-right:4px}
