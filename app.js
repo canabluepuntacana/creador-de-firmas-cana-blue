@@ -313,6 +313,18 @@ async function download() {
 }
 
 let ipickBound = false;
+// Floating popups escape the scrolling editor: position fixed to the viewport
+function placeFixed(menu, anchor, minW) {
+  const r = anchor.getBoundingClientRect();
+  menu.style.position = 'fixed';
+  menu.style.top = (r.bottom + 5) + 'px';
+  menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - minW - 8)) + 'px';
+  menu.style.minWidth = Math.max(minW, r.width) + 'px';
+  menu.style.zIndex = 999;
+}
+function hideFloatMenus() {
+  document.querySelectorAll('.ipick-menu,.agent-list').forEach(m => m.classList.add('hidden'));
+}
 function iconPicker(selected, onPick) {
   const wrap = document.createElement('div'); wrap.className = 'ipick';
   const paint = k => {
@@ -329,12 +341,14 @@ function iconPicker(selected, onPick) {
   wrap.querySelector('.ipick-btn').onclick = e => {
     e.stopPropagation();
     document.querySelectorAll('.ipick-menu').forEach(m => { if (m !== menu) m.classList.add('hidden'); });
+    const opening = menu.classList.contains('hidden');
     menu.classList.toggle('hidden');
+    if (opening) placeFixed(menu, wrap.querySelector('.ipick-btn'), 200);
   };
   menu.querySelectorAll('.ipick-item').forEach(it => it.onclick = e => {
     e.stopPropagation(); paint(it.dataset.k); menu.classList.add('hidden'); onPick(it.dataset.k);
   });
-  if (!ipickBound) { ipickBound = true; document.addEventListener('click', () => document.querySelectorAll('.ipick-menu').forEach(m => m.classList.add('hidden'))); }
+  if (!ipickBound) { ipickBound = true; document.addEventListener('click', hideFloatMenus); document.addEventListener('scroll', hideFloatMenus, true); window.addEventListener('resize', hideFloatMenus); }
   return wrap;
 }
 function setIconStyle(s) {
@@ -555,8 +569,8 @@ $('fFotoFile').addEventListener('change', e => {
 $('btnAddLink').onclick = () => addLinkRow();
 $('btnAddCert').onclick = () => addCertRow();
 $('btnCopyRich').onclick = copyRich; $('btnCopyHtml').onclick = copyHtml; $('btnDownload').onclick = download;
-$('agentSearch').addEventListener('focus', e => { renderAgentList(e.target.value); $('agentList').classList.remove('hidden'); });
-$('agentSearch').addEventListener('input', e => { renderAgentList(e.target.value); $('agentList').classList.remove('hidden'); });
+$('agentSearch').addEventListener('focus', e => { renderAgentList(e.target.value); $('agentList').classList.remove('hidden'); placeFixed($('agentList'), e.target, 220); });
+$('agentSearch').addEventListener('input', e => { renderAgentList(e.target.value); $('agentList').classList.remove('hidden'); placeFixed($('agentList'), e.target, 220); });
 $('agentSearch').addEventListener('blur', () => setTimeout(() => $('agentList').classList.add('hidden'), 150));
 $('agentSearch').addEventListener('keydown', e => { if (e.key === 'Enter') { const first = $('agentList').querySelector('.agent-item'); if (first) { fillAgent(AGENTS.find(x => x.key === first.dataset.key)); $('agentList').classList.add('hidden'); } } });
 $('toggleCode').onchange = e => $('codeBox').classList.toggle('hidden', !e.target.checked);
