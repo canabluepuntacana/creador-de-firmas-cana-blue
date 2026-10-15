@@ -41,8 +41,8 @@ git push -u origin main
 ## Google Sheets database
 
 1. Create a spreadsheet with a tab named `Agentes` and this exact header row:
-   `key | name | role | zona | tel | email | web | dir | dirUrl | listings | linkedin | instagram | whatsapp | foto | logo | color | crs | aei | realtor | sr23 | sr24 | lux`
-   Cert columns use `TRUE` / `FALSE`. One agent per row.
+   `key | name | role | zona | tel | email | web | dir | dirUrl | listings | linkedin | instagram | whatsapp | foto | logo | color | iconStyle | crs | aei | realtor | sr23 | sr24 | lux`
+   Cert columns use `TRUE` / `FALSE`; `iconStyle` is `solid`, `outline` or `plain`.
 2. Share → General access → **Anyone with the link** (Viewer).
 3. Copy the spreadsheet ID from its URL (`/d/ID/edit`) and paste it in the
    creator's **Google Sheet ID** field → **Reload**. The ID is remembered.

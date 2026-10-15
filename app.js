@@ -17,6 +17,7 @@ const state = {
   certLinks: { crs: '', aei: '', realtor: '', sr23: '', sr24: '', lux: '' },
   customCerts: [],
   extra: [],
+  iconStyle: 'solid',
   vis: { foto: true, zona: true, social: true, certs: true, legal: true },
   legal: 'The information in this email is confidential and intended solely for its recipient.'
 };
@@ -38,17 +39,16 @@ function networkGlyph(n, hex) {
   return `https://img.icons8.com/ios-filled/50/${hex}/${n.slug}.png`;
 }
 // Extra-link button in 3 shapes: circle (solid) / square (solid) / outline (line only, no fill)
-function extraBtn(e, c) {
-  const n = NETWORKS[e.icon] || NETWORKS.website;
-  const bg = e.icon === 'website' ? c : (n.bg || c);
-  const shape = e.shape || 'circle';
-  if (shape === 'square') return `<a href="${e.url}" target="_blank" style="display:inline-block;width:28px;height:28px;border-radius:7px;background-color:${bg};text-align:center;vertical-align:middle;"><img src="${n.img}" width="15" height="15" alt="${n.label}" style="display:inline-block;width:15px;height:15px;margin-top:6px;border:0;"></a>`;
-  if (shape === 'outline') {
-    const hex = (bg.charAt(0) === '#' ? bg.slice(1) : bg);
-    return `<a href="${e.url}" target="_blank" style="display:inline-block;width:26px;height:26px;border-radius:50%;border:1px solid ${bg};background-color:transparent;text-align:center;vertical-align:middle;"><img src="${networkGlyph(n, hex)}" width="14" height="14" alt="${n.label}" style="display:inline-block;width:14px;height:14px;margin-top:6px;border:0;"></a>`;
-  }
-  return socialBtn(e.url, bg, n.img, n.label);
+// Global social icon style (solid / outline / plain), always in official brand colors
+function socialIcon(url, key, style, c) {
+  const n = NETWORKS[key] || NETWORKS.website;
+  const bg = key === 'website' ? c : (n.bg || c);
+  const hex = bg.charAt(0) === '#' ? bg.slice(1) : bg;
+  if (style === 'outline') return `<a href="${url}" target="_blank" style="display:inline-block;width:26px;height:26px;border-radius:50%;border:1px solid ${bg};background-color:transparent;text-align:center;vertical-align:middle;"><img src="${networkGlyph(n, hex)}" width="14" height="14" alt="${n.label}" style="display:inline-block;width:14px;height:14px;margin-top:6px;border:0;"></a>`;
+  if (style === 'plain') return `<a href="${url}" target="_blank" style="display:inline-block;vertical-align:middle;"><img src="${networkGlyph(n, hex)}" width="22" height="22" alt="${n.label}" style="display:inline-block;width:22px;height:22px;border:0;"></a>`;
+  return socialBtn(url, bg, n.img, n.label);
 }
+function extraBtn(e, c, style) { return socialIcon(e.url, e.icon, style || 'solid', c); }
 // Fixed official certification artwork (uploaed to Cloudinary)
 const CERT_IMG = {
   crs: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-CRS.png',
@@ -74,8 +74,6 @@ const cleanHex = h => (h || '#174176').trim();
 // (email clients block SVG/Iconify, so brand/official logos ship as PNG images).
 const lineIcon = (name, colorHex) => `https://img.icons8.com/ios/50/${colorHex.replace('#', '')}/${name}.png`;
 const whiteGlyph = name => `https://img.icons8.com/ios-filled/50/ffffff/${name}.png`;
-// Thick-outline white glyph (Material style) for the Instagram circle
-const INSTAGRAM_LINE = 'https://img.icons8.com/material-outlined/48/ffffff/instagram-new--v1.png';
 
 function contactRow(iconUrl, contentHtml) {
   return `<tr><td width="22" style="vertical-align:middle;padding:3px 0;"><img src="${iconUrl}" width="15" height="15" style="display:block;width:15px;height:15px;" alt=""></td><td style="vertical-align:middle;font-size:12px;line-height:17px;color:#222222;font-family:Arial,Helvetica,sans-serif;">${contentHtml}</td></tr>`;
@@ -131,12 +129,13 @@ async function buildHTML() {
     contactRow(lineIcon('marker', c), s.dirUrl ? `<a href="${s.dirUrl}" target="_blank" style="color:#222;text-decoration:none;">${s.dir}</a>` : `<span>${s.dir}</span>`);
 
   // Social circles only: Instagram (outline glyph) / WhatsApp (flat) / LinkedIn.
+  const ist = s.iconStyle || 'solid';
   let socials = !s.vis.social ? '' :
-    socialBtn(s.instagram, BRAND.instagram, INSTAGRAM_LINE, 'Instagram') + '&nbsp;' +
-    socialBtn(s.whatsapp, BRAND.whatsapp, whiteGlyph('whatsapp--v1'), 'WhatsApp') + '&nbsp;' +
-    socialBtn(s.linkedin, BRAND.linkedin, whiteGlyph('linkedin--v1'), 'LinkedIn');
+    socialIcon(s.instagram, 'instagram', ist, c) + '&nbsp;' +
+    socialIcon(s.whatsapp, 'whatsapp', ist, c) + '&nbsp;' +
+    socialIcon(s.linkedin, 'linkedin', ist, c);
   if (s.vis.social && s.extra.length) {
-    const xc = s.extra.filter(e => e.url).map(e => extraBtn(e, c)).join('&nbsp;');
+    const xc = s.extra.filter(e => e.url).map(e => extraBtn(e, c, ist)).join('&nbsp;');
     if (xc) socials += '&nbsp;' + xc;
   }
 
@@ -326,18 +325,19 @@ function iconPicker(selected, onPick) {
   if (!ipickBound) { ipickBound = true; document.addEventListener('click', () => document.querySelectorAll('.ipick-menu').forEach(m => m.classList.add('hidden'))); }
   return wrap;
 }
-function addLinkRow(icon = 'facebook', url = '', shape = 'circle') {
+function setIconStyle(s) {
+  state.iconStyle = (s === 'outline' || s === 'plain') ? s : 'solid';
+  document.querySelectorAll('#iconStyleSeg button').forEach(b => b.classList.toggle('on', b.dataset.s === state.iconStyle));
+}
+function addLinkRow(icon = 'facebook', url = '') {
   const d = document.createElement('div'); d.className = 'xlink xlink-net';
   d._icon = NETWORKS[icon] ? icon : 'facebook';
   const urlInput = document.createElement('input'); urlInput.placeholder = 'https://…'; urlInput.value = url || '';
-  const shapeSel = document.createElement('select'); shapeSel.className = 'shape-sel';
-  shapeSel.innerHTML = `<option value="circle">Circle</option><option value="square">Square</option><option value="outline">Line only</option>`;
-  shapeSel.value = ['circle', 'square', 'outline'].includes(shape) ? shape : 'circle';
   const del = document.createElement('button'); del.textContent = '✕'; del.title = 'Remove';
-  const sync = () => { state.extra = [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value, shape: r.querySelector('select').value })).filter(e => e.url); render(); };
+  const sync = () => { state.extra = [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value })).filter(e => e.url); render(); };
   d.appendChild(iconPicker(d._icon, k => { d._icon = k; sync(); }));
-  d.appendChild(urlInput); d.appendChild(shapeSel); d.appendChild(del);
-  urlInput.oninput = sync; shapeSel.onchange = sync; del.onclick = () => { d.remove(); sync(); };
+  d.appendChild(urlInput); d.appendChild(del);
+  urlInput.oninput = sync; del.onclick = () => { d.remove(); sync(); };
   $('extraLinks').appendChild(d);
 }
 function addCertRow(img = '', link = '') {
@@ -388,7 +388,8 @@ async function loadSheetAgents(id) {
       listings: o.listings || '', linkedin: o.linkedin || '',
       instagram: o.instagram || '', whatsapp: o.whatsapp || '',
       foto: o.foto || '', logo: o.logo || '',
-      certs: { crs: B(o.crs), aei: B(o.aei), realtor: B(o.realtor), sr23: B(o.sr23), sr24: B(o.sr24), lux: o.lux == null ? true : B(o.lux) }
+      certs: { crs: B(o.crs), aei: B(o.aei), realtor: B(o.realtor), sr23: B(o.sr23), sr24: B(o.sr24), lux: o.lux == null ? true : B(o.lux) },
+      iconStyle: ['solid', 'outline', 'plain'].includes(String(o.iconstyle || '').toLowerCase()) ? String(o.iconstyle).toLowerCase() : 'solid'
     };
   }).filter(a => a.name);
 }
@@ -430,7 +431,8 @@ function collectAgent(key) {
     dir: $('fDir').value, dirUrl: $('fDirUrl').value, listings: $('fListings').value,
     linkedin: $('fLinkedin').value, instagram: $('fInstagram').value, whatsapp: $('fWhatsapp').value,
     foto: $('fFoto').value, logo: $('fLogo').value,
-    extra: [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value, shape: r.querySelector('select').value })).filter(e => e.url),
+    extra: [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value })).filter(e => e.url),
+    iconStyle: state.iconStyle,
     certLinks: { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value },
     customCerts: [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link),
     certs: { crs: $('cCRS').checked, aei: $('cAEI').checked, realtor: $('cRealtor').checked, sr23: $('cSR23').checked, sr24: $('cSR24').checked, lux: $('cLux').checked }
@@ -453,7 +455,8 @@ function applyAgent(a) {
   const linkIds = { crs: 'fLinkCRS', aei: 'fLinkAEI', realtor: 'fLinkRealtor', sr23: 'fLinkSR23', sr24: 'fLinkSR24', lux: 'fLinkLux' };
   for (const k in linkIds) { const el = $(linkIds[k]); if (el) el.value = (a.certLinks && a.certLinks[k]) || ''; }
   document.querySelectorAll('#extraLinks .xlink-net').forEach(n => n.remove());
-  (a.extra || []).forEach(x => addLinkRow(x.icon, x.url, x.shape));
+  (a.extra || []).forEach(x => addLinkRow(x.icon, x.url));
+  setIconStyle(a.iconStyle || 'solid');
   document.querySelectorAll('#customCerts .xlink').forEach(n => n.remove());
   (a.customCerts || []).forEach(x => addCertRow(x.img, x.link));
   $('agentSearch').value = a.name || '';
@@ -524,6 +527,7 @@ function renderAgentList(filter = '') {
   });
 }
 
+document.querySelectorAll('#iconStyleSeg button').forEach(b => b.onclick = () => { setIconStyle(b.dataset.s); render(); });
 document.querySelectorAll('#tplGrid .tpl').forEach(b => b.onclick = () => { state.tpl = b.dataset.tpl; render(); });
 document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; render(); });
 ['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', render));
