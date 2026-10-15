@@ -23,17 +23,32 @@ const state = {
 const BRAND = { instagram: '#000000', whatsapp: '#25D366', linkedin: '#0A66C2' };
 // Logo picker for extra links: official-style white glyph on brand color (email-safe PNG)
 const NETWORKS = {
-  facebook: { label: 'Facebook', bg: '#1877F2', img: 'https://img.icons8.com/ios-filled/50/ffffff/facebook--v1.png' },
-  instagram: { label: 'Instagram', bg: '#000000', img: 'https://img.icons8.com/material-outlined/48/ffffff/instagram-new--v1.png' },
-  whatsapp: { label: 'WhatsApp', bg: '#25D366', img: 'https://img.icons8.com/ios-filled/50/ffffff/whatsapp--v1.png' },
-  linkedin: { label: 'LinkedIn', bg: '#0A66C2', img: 'https://img.icons8.com/ios-filled/50/ffffff/linkedin--v1.png' },
-  x: { label: 'X (Twitter)', bg: '#000000', img: 'https://img.icons8.com/ios-filled/50/ffffff/twitterx--v1.png' },
-  tiktok: { label: 'TikTok', bg: '#000000', img: 'https://img.icons8.com/ios-filled/50/ffffff/tiktok--v1.png' },
-  youtube: { label: 'YouTube', bg: '#FF0000', img: 'https://img.icons8.com/ios-filled/50/ffffff/youtube--v1.png' },
-  telegram: { label: 'Telegram', bg: '#229ED9', img: 'https://img.icons8.com/ios-filled/50/ffffff/telegram-app--v1.png' },
-  pinterest: { label: 'Pinterest', bg: '#E60023', img: 'https://img.icons8.com/ios-filled/50/ffffff/pinterest--v1.png' },
-  website: { label: 'Website / custom link', bg: '', img: 'https://img.icons8.com/ios-filled/50/ffffff/link--v1.png' }
+  facebook: { label: 'Facebook', bg: '#1877F2', slug: 'facebook--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/facebook--v1.png' },
+  instagram: { label: 'Instagram', bg: '#000000', slug: 'instagram-new--v1', img: 'https://img.icons8.com/material-outlined/48/ffffff/instagram-new--v1.png' },
+  whatsapp: { label: 'WhatsApp', bg: '#25D366', slug: 'whatsapp--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/whatsapp--v1.png' },
+  linkedin: { label: 'LinkedIn', bg: '#0A66C2', slug: 'linkedin--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/linkedin--v1.png' },
+  x: { label: 'X (Twitter)', bg: '#000000', slug: 'twitterx--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/twitterx--v1.png' },
+  tiktok: { label: 'TikTok', bg: '#000000', slug: 'tiktok--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/tiktok--v1.png' },
+  youtube: { label: 'YouTube', bg: '#FF0000', slug: 'youtube--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/youtube--v1.png' },
+  telegram: { label: 'Telegram', bg: '#229ED9', slug: 'telegram-app--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/telegram-app--v1.png' },
+  pinterest: { label: 'Pinterest', bg: '#E60023', slug: 'pinterest--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/pinterest--v1.png' },
+  website: { label: 'Website / custom link', bg: '#174176', slug: 'link--v1', img: 'https://img.icons8.com/ios-filled/50/ffffff/link--v1.png' }
 };
+function networkGlyph(n, hex) {
+  return `https://img.icons8.com/ios-filled/50/${hex}/${n.slug}.png`;
+}
+// Extra-link button in 3 shapes: circle (solid) / square (solid) / outline (line only, no fill)
+function extraBtn(e, c) {
+  const n = NETWORKS[e.icon] || NETWORKS.website;
+  const bg = e.icon === 'website' ? c : (n.bg || c);
+  const shape = e.shape || 'circle';
+  if (shape === 'square') return `<a href="${e.url}" target="_blank" style="display:inline-block;width:28px;height:28px;border-radius:7px;background-color:${bg};text-align:center;vertical-align:middle;"><img src="${n.img}" width="15" height="15" alt="${n.label}" style="display:inline-block;width:15px;height:15px;margin-top:6px;border:0;"></a>`;
+  if (shape === 'outline') {
+    const hex = (bg.charAt(0) === '#' ? bg.slice(1) : bg);
+    return `<a href="${e.url}" target="_blank" style="display:inline-block;width:26px;height:26px;border-radius:50%;border:1px solid ${bg};background-color:transparent;text-align:center;vertical-align:middle;"><img src="${networkGlyph(n, hex)}" width="14" height="14" alt="${n.label}" style="display:inline-block;width:14px;height:14px;margin-top:6px;border:0;"></a>`;
+  }
+  return socialBtn(e.url, bg, n.img, n.label);
+}
 // Fixed official certification artwork (uploaed to Cloudinary)
 const CERT_IMG = {
   crs: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-CRS.png',
@@ -121,10 +136,7 @@ async function buildHTML() {
     socialBtn(s.whatsapp, BRAND.whatsapp, whiteGlyph('whatsapp--v1'), 'WhatsApp') + '&nbsp;' +
     socialBtn(s.linkedin, BRAND.linkedin, whiteGlyph('linkedin--v1'), 'LinkedIn');
   if (s.vis.social && s.extra.length) {
-    const xc = s.extra.filter(e => e.url).map(e => {
-      const n = NETWORKS[e.icon] || NETWORKS.website;
-      return socialBtn(e.url, e.icon === 'website' ? c : n.bg, n.img, n.label);
-    }).join('&nbsp;');
+    const xc = s.extra.filter(e => e.url).map(e => extraBtn(e, c)).join('&nbsp;');
     if (xc) socials += '&nbsp;' + xc;
   }
 
@@ -289,12 +301,43 @@ async function download() {
   a.download = 'signature-' + state.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.html'; a.click();
 }
 
-function addLinkRow(icon = 'facebook', url = '') {
-  const d = document.createElement('div'); d.className = 'xlink';
-  const opts = Object.keys(NETWORKS).map(k => `<option value="${k}"${k === icon ? ' selected' : ''}>${NETWORKS[k].label}</option>`).join('');
-  d.innerHTML = `<select>${opts}</select><input placeholder="https://…" value="${url || ''}"><button>✕</button>`;
-  const sync = () => { state.extra = [...document.querySelectorAll('#extraLinks .xlink')].map(r => ({ icon: r.querySelector('select').value, url: r.querySelector('input').value })).filter(e => e.url); render(); };
-  d.querySelector('select').onchange = sync; d.querySelector('input').oninput = sync; d.querySelector('button').onclick = () => { d.remove(); sync(); };
+let ipickBound = false;
+function iconPicker(selected, onPick) {
+  const wrap = document.createElement('div'); wrap.className = 'ipick';
+  const paint = k => {
+    const n = NETWORKS[k] || NETWORKS.facebook;
+    wrap.querySelector('.ipick-btn').innerHTML = `<span class="ipick-logo" style="background:${n.bg}"><img src="${n.img}" alt=""></span><span>${n.label}</span>`;
+    wrap.querySelectorAll('.ipick-item').forEach(it => it.classList.toggle('sel', it.dataset.k === k));
+  };
+  const n0 = NETWORKS[selected] || NETWORKS.facebook;
+  wrap.innerHTML = `<button type="button" class="ipick-btn"><span class="ipick-logo" style="background:${n0.bg}"><img src="${n0.img}" alt=""></span><span>${n0.label}</span></button><div class="ipick-menu hidden">${Object.keys(NETWORKS).map(k => {
+    const n = NETWORKS[k];
+    return `<div class="ipick-item${k === selected ? ' sel' : ''}" data-k="${k}"><span class="ipick-logo" style="background:${n.bg}"><img src="${n.img}" alt=""></span><span>${n.label}</span></div>`;
+  }).join('')}</div>`;
+  const menu = wrap.querySelector('.ipick-menu');
+  wrap.querySelector('.ipick-btn').onclick = e => {
+    e.stopPropagation();
+    document.querySelectorAll('.ipick-menu').forEach(m => { if (m !== menu) m.classList.add('hidden'); });
+    menu.classList.toggle('hidden');
+  };
+  menu.querySelectorAll('.ipick-item').forEach(it => it.onclick = e => {
+    e.stopPropagation(); paint(it.dataset.k); menu.classList.add('hidden'); onPick(it.dataset.k);
+  });
+  if (!ipickBound) { ipickBound = true; document.addEventListener('click', () => document.querySelectorAll('.ipick-menu').forEach(m => m.classList.add('hidden'))); }
+  return wrap;
+}
+function addLinkRow(icon = 'facebook', url = '', shape = 'circle') {
+  const d = document.createElement('div'); d.className = 'xlink xlink-net';
+  d._icon = NETWORKS[icon] ? icon : 'facebook';
+  const urlInput = document.createElement('input'); urlInput.placeholder = 'https://…'; urlInput.value = url || '';
+  const shapeSel = document.createElement('select'); shapeSel.className = 'shape-sel';
+  shapeSel.innerHTML = `<option value="circle">Circle</option><option value="square">Square</option><option value="outline">Line only</option>`;
+  shapeSel.value = ['circle', 'square', 'outline'].includes(shape) ? shape : 'circle';
+  const del = document.createElement('button'); del.textContent = '✕'; del.title = 'Remove';
+  const sync = () => { state.extra = [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value, shape: r.querySelector('select').value })).filter(e => e.url); render(); };
+  d.appendChild(iconPicker(d._icon, k => { d._icon = k; sync(); }));
+  d.appendChild(urlInput); d.appendChild(shapeSel); d.appendChild(del);
+  urlInput.oninput = sync; shapeSel.onchange = sync; del.onclick = () => { d.remove(); sync(); };
   $('extraLinks').appendChild(d);
 }
 function addCertRow(img = '', link = '') {
@@ -387,7 +430,7 @@ function collectAgent(key) {
     dir: $('fDir').value, dirUrl: $('fDirUrl').value, listings: $('fListings').value,
     linkedin: $('fLinkedin').value, instagram: $('fInstagram').value, whatsapp: $('fWhatsapp').value,
     foto: $('fFoto').value, logo: $('fLogo').value,
-    extra: [...document.querySelectorAll('#extraLinks .xlink')].map(r => ({ icon: r.querySelector('select').value, url: r.querySelector('input').value })).filter(e => e.url),
+    extra: [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value, shape: r.querySelector('select').value })).filter(e => e.url),
     certLinks: { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value },
     customCerts: [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link),
     certs: { crs: $('cCRS').checked, aei: $('cAEI').checked, realtor: $('cRealtor').checked, sr23: $('cSR23').checked, sr24: $('cSR24').checked, lux: $('cLux').checked }
@@ -409,8 +452,8 @@ function applyAgent(a) {
   if (ct.lux !== undefined) $('cLux').checked = !!ct.lux;
   const linkIds = { crs: 'fLinkCRS', aei: 'fLinkAEI', realtor: 'fLinkRealtor', sr23: 'fLinkSR23', sr24: 'fLinkSR24', lux: 'fLinkLux' };
   for (const k in linkIds) { const el = $(linkIds[k]); if (el) el.value = (a.certLinks && a.certLinks[k]) || ''; }
-  document.querySelectorAll('#extraLinks .xlink').forEach(n => n.remove());
-  (a.extra || []).forEach(x => addLinkRow(x.icon, x.url));
+  document.querySelectorAll('#extraLinks .xlink-net').forEach(n => n.remove());
+  (a.extra || []).forEach(x => addLinkRow(x.icon, x.url, x.shape));
   document.querySelectorAll('#customCerts .xlink').forEach(n => n.remove());
   (a.customCerts || []).forEach(x => addCertRow(x.img, x.link));
   $('agentSearch').value = a.name || '';
