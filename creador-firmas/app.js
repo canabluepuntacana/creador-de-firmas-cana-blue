@@ -289,13 +289,61 @@ const getCustoms = () => { try { return JSON.parse(localStorage.getItem(LS_CUSTO
 const setCustoms = c => localStorage.setItem(LS_CUSTOM, JSON.stringify(c));
 const isCustom = key => getCustoms().some(x => x.key === key);
 const slug = s => (s || 'agent').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'agent';
+const SHEET_TAB = 'Agentes';
+const LS_SHEET = 'canablue.sheet.id.v1';
+function setDbStatus(msg, cls) {
+  const s = $('dbStatus'); if (s) s.textContent = msg;
+  const d = $('dbDot'); if (d) d.className = 'db-dot' + (cls ? ' ' + cls : '');
+}
+async function loadSheetAgents(id) {
+  const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_TAB)}&headers=1`;
+  const r = await fetch(url);
+  if (!r.ok) throw 0;
+  const t = await r.text();
+  const json = JSON.parse(t.substring(t.indexOf('{'), t.lastIndexOf('}') + 1));
+  const cols = (json.table.cols || []).map(c => String((c && c.label) || '').trim().toLowerCase());
+  const B = v => v === true || v === 1 || String(v).toUpperCase() === 'TRUE' || String(v) === '1';
+  return (json.table.rows || []).map(row => {
+    const o = {}; const cells = row.c || [];
+    cols.forEach((h, i) => { o[h] = cells[i] ? cells[i].v : null; });
+    return {
+      key: String(o.key || '').trim() || slug(o.name),
+      color: o.color || '', name: o.name || '', role: o.role || '', zona: o.zona || '',
+      tel: o.tel || '', email: o.email || '', web: o.web || 'canablue.com',
+      dir: o.dir || DIR_DEFAULT, dirUrl: o.dirUrl || MAPS_DEFAULT,
+      listings: o.listings || '', linkedin: o.linkedin || '',
+      instagram: o.instagram || '', whatsapp: o.whatsapp || '',
+      foto: o.foto || '', logo: o.logo || '',
+      certs: { crs: B(o.crs), aei: B(o.aei), realtor: B(o.realtor), sr23: B(o.sr23), sr24: B(o.sr24), lux: o.lux == null ? true : B(o.lux) }
+    };
+  }).filter(a => a.name);
+}
 async function loadAgents() {
-  try {
-    const r = await fetch('data/agents.json', { cache: 'no-store' });
-    if (!r.ok) throw 0;
-    const j = await r.json();
-    if (Array.isArray(j) && j.length) { JSON_AGENTS = j; AGENTS = j.slice(); }
-  } catch { /* file:// or offline: keep built-ins */ }
+  AGENTS = BUILTIN_AGENTS.slice();
+  JSON_AGENTS = [];
+  const sid = (($('fSheetId') && $('fSheetId').value) || '').trim();
+  if (sid) {
+    try {
+      const sheet = await loadSheetAgents(sid);
+      if (sheet.length) {
+        AGENTS = sheet;
+        try { localStorage.setItem(LS_SHEET, sid); } catch {}
+        setDbStatus(`Google Sheets — ${sheet.length} agent(s) loaded`, 'ok');
+      } else {
+        setDbStatus('Google Sheets — empty sheet, using local data', 'err');
+      }
+    } catch {
+      setDbStatus('Google Sheets — check ID / sharing, using local data', 'err');
+    }
+  } else {
+    try {
+      const r = await fetch('data/agents.json', { cache: 'no-store' });
+      if (!r.ok) throw 0;
+      const j = await r.json();
+      if (Array.isArray(j) && j.length) { JSON_AGENTS = j; AGENTS = j.slice(); }
+      setDbStatus(`Local file — ${AGENTS.length} agent(s). Paste a Sheet ID for live data.`, '');
+    } catch { setDbStatus('Built-in data (offline or file://).', ''); }
+  }
   getCustoms().forEach(c => {
     const i = AGENTS.findIndex(a => a.key === c.key);
     if (i >= 0) AGENTS[i] = c; else AGENTS.push(c);
@@ -410,4 +458,7 @@ $('agentSearch').addEventListener('keydown', e => { if (e.key === 'Enter') { con
 $('toggleCode').onchange = e => $('codeBox').classList.toggle('hidden', !e.target.checked);
 $('btnSaveAgent').onclick = saveCurrentAgent;
 $('btnExportAgents').onclick = exportAgentsJSON;
+$('btnReloadDb').onclick = () => loadAgents().then(() => { renderAgentList($('agentSearch').value); render(); });
+$('fSheetId').addEventListener('change', e => { try { localStorage.setItem(LS_SHEET, e.target.value.trim()); } catch {} });
+try { const sid = localStorage.getItem(LS_SHEET); if (sid) $('fSheetId').value = sid; } catch {}
 loadAgents().then(() => { restoreAutosave(); render(); });
