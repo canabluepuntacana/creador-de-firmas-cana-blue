@@ -14,12 +14,35 @@ const state = {
   foto: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792087360/Firmas_de_correo_Electronico_pamela.png',
   logo: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792071937/10._logo-blue-google.png',
   certs: { crs: true, aei: true, realtor: true, sr23: false, sr24: true, lux: true },
-  certUrls: { crs: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-CRS.png', aei: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-AEI.png', realtor: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-REALTOR.png', sr23: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Best-of-DR-2023.png', sr24: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Best-of-DR-2024.png', lux: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Luxury-Homes-Expert.png' },
+  certLinks: { crs: '', aei: '', realtor: '', sr23: '', sr24: '', lux: '' },
+  customCerts: [],
   extra: [],
   vis: { foto: true, zona: true, social: true, certs: true, legal: true },
   legal: 'The information in this email is confidential and intended solely for its recipient.'
 };
 const BRAND = { instagram: '#000000', whatsapp: '#25D366', linkedin: '#0A66C2' };
+// Logo picker for extra links: official-style white glyph on brand color (email-safe PNG)
+const NETWORKS = {
+  facebook: { label: 'Facebook', bg: '#1877F2', img: 'https://img.icons8.com/ios-filled/50/ffffff/facebook--v1.png' },
+  instagram: { label: 'Instagram', bg: '#000000', img: 'https://img.icons8.com/material-outlined/48/ffffff/instagram-new--v1.png' },
+  whatsapp: { label: 'WhatsApp', bg: '#25D366', img: 'https://img.icons8.com/ios-filled/50/ffffff/whatsapp--v1.png' },
+  linkedin: { label: 'LinkedIn', bg: '#0A66C2', img: 'https://img.icons8.com/ios-filled/50/ffffff/linkedin--v1.png' },
+  x: { label: 'X (Twitter)', bg: '#000000', img: 'https://img.icons8.com/ios-filled/50/ffffff/twitterx--v1.png' },
+  tiktok: { label: 'TikTok', bg: '#000000', img: 'https://img.icons8.com/ios-filled/50/ffffff/tiktok--v1.png' },
+  youtube: { label: 'YouTube', bg: '#FF0000', img: 'https://img.icons8.com/ios-filled/50/ffffff/youtube--v1.png' },
+  telegram: { label: 'Telegram', bg: '#229ED9', img: 'https://img.icons8.com/ios-filled/50/ffffff/telegram-app--v1.png' },
+  pinterest: { label: 'Pinterest', bg: '#E60023', img: 'https://img.icons8.com/ios-filled/50/ffffff/pinterest--v1.png' },
+  website: { label: 'Website / custom link', bg: '', img: 'https://img.icons8.com/ios-filled/50/ffffff/link--v1.png' }
+};
+// Fixed official certification artwork (uploaed to Cloudinary)
+const CERT_IMG = {
+  crs: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-CRS.png',
+  aei: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-AEI.png',
+  realtor: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-REALTOR.png',
+  sr23: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Best-of-DR-2023.png',
+  sr24: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Best-of-DR-2024.png',
+  lux: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Luxury-Homes-Expert.png'
+};
 const dataCache = {}; // local asset -> dataURL (so the copied signature carries its images)
 
 async function toDataURL(url) {
@@ -59,33 +82,27 @@ const CERT_DEFS = [
   ['crs', 'CRS'], ['aei', 'AEI'], ['realtor', 'REALTOR'],
   ['sr23', 'Best of DR 2023'], ['sr24', 'Best of DR 2024'], ['lux', 'Luxury Homes Expert']
 ];
-function certImgs(logoData, certs, h) {
-  return CERT_DEFS.filter(([k]) => certs[k])
-    .map(([k, alt]) => `<img src="${logoData[k]}" height="${h}" style="height:${h}px;width:auto;display:inline-block;border:0;" alt="${alt}">`);
+function certImgTag(src, alt, link, h) {
+  const img = `<img src="${src}" height="${h}" style="height:${h}px;width:auto;display:inline-block;border:0;" alt="${alt}">`;
+  return link ? `<a href="${link}" target="_blank" style="text-decoration:none;border:0;">${img}</a>` : img;
 }
-function certsRow(logoData, certs, vis) {
+function certImgs(certs, links, customs, h) {
+  const out = CERT_DEFS.filter(([k]) => certs[k])
+    .map(([k, alt]) => certImgTag(CERT_IMG[k], alt, links[k], h));
+  (customs || []).filter(x => x.img).forEach(x => out.push(certImgTag(x.img, 'Certification', x.link, h)));
+  return out;
+}
+function certsRow(certs, links, customs, vis) {
   if (!vis.certs) return '';
-  const imgs = certImgs(logoData, certs, 30);
+  const imgs = certImgs(certs, links, customs, 30);
   if (!imgs.length) return '';
   return `<tr><td align="center" style="padding-top:12px;"><div>${imgs.join('&nbsp;&nbsp;')}</div></td></tr>`;
 }
-function extraLinksRow(extra, c) {
-  if (!extra.length) return '';
-  const l = extra.map(e => `<a href="${e.url}" target="_blank" style="color:${c};font-size:12px;font-family:Arial,Helvetica,sans-serif;">${e.label}</a>`).join(' &nbsp;·&nbsp; ');
-  return `<tr><td style="padding-top:8px;font-family:Arial,Helvetica,sans-serif;">${l}</td></tr>`;
-}
+/* Extra links render as social circles appended to `socials` (see above). */
 
 async function buildHTML() {
   const s = state, c = cleanHex(s.color);
   const logoUrl = await toDataURL(s.logo);
-  const logoData = {
-    crs: await toDataURL(s.certUrls.crs),
-    aei: await toDataURL(s.certUrls.aei),
-    realtor: await toDataURL(s.certUrls.realtor),
-    sr23: await toDataURL(s.certUrls.sr23),
-    sr24: await toDataURL(s.certUrls.sr24),
-    lux: await toDataURL(s.certUrls.lux)
-  };
   const telHref = 'tel:' + s.tel.replace(/[^+\d]/g, '');
   const webHref = s.web.startsWith('http') ? s.web : 'https://' + s.web;
   const fotoCell = (size) => s.vis.foto
@@ -99,17 +116,23 @@ async function buildHTML() {
     contactRow(lineIcon('marker', c), s.dirUrl ? `<a href="${s.dirUrl}" target="_blank" style="color:#222;text-decoration:none;">${s.dir}</a>` : `<span>${s.dir}</span>`);
 
   // Social circles only: Instagram (outline glyph) / WhatsApp (flat) / LinkedIn.
-  const socials = !s.vis.social ? '' :
+  let socials = !s.vis.social ? '' :
     socialBtn(s.instagram, BRAND.instagram, INSTAGRAM_LINE, 'Instagram') + '&nbsp;' +
     socialBtn(s.whatsapp, BRAND.whatsapp, whiteGlyph('whatsapp--v1'), 'WhatsApp') + '&nbsp;' +
     socialBtn(s.linkedin, BRAND.linkedin, whiteGlyph('linkedin--v1'), 'LinkedIn');
+  if (s.vis.social && s.extra.length) {
+    const xc = s.extra.filter(e => e.url).map(e => {
+      const n = NETWORKS[e.icon] || NETWORKS.website;
+      return socialBtn(e.url, e.icon === 'website' ? c : n.bg, n.img, n.label);
+    }).join('&nbsp;');
+    if (xc) socials += '&nbsp;' + xc;
+  }
 
   const legal = s.vis.legal
     ? `<tr><td style="padding-top:12px;font-size:10px;line-height:14px;color:#8a94a8;text-align:center;font-family:Arial,Helvetica,sans-serif;max-width:560px;">${s.legal}</td></tr>` : '';
   const viewBtn = viewPropsBtn(s.listings, c);
 
-  const certs = certsRow(logoData, s.certs, s.vis);
-  const extras = extraLinksRow(s.extra, c);
+  const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis);
   const zona = (s.vis.zona && s.zona) ? zonaText(s.zona) : '';
 
   if (s.tpl === 'broker') {
@@ -120,7 +143,7 @@ async function buildHTML() {
 <td width="1" style="background-color:${c};width:1px;font-size:0;">&nbsp;</td><td width="20"></td>
 <td valign="top"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr>
 <tr><td colspan="4"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:14px;border-top:1px solid ${c};"><tbody><tr>
-<td valign="middle" align="center" style="padding-top:12px;">${s.vis.certs ? certImgs(logoData, s.certs, 28).join('&nbsp;') : ''}</td>
+<td valign="middle" align="center" style="padding-top:12px;">${s.vis.certs ? certImgs(s.certs, s.certLinks, s.customCerts, 28).join('&nbsp;') : ''}</td>
 <td align="right" valign="middle" style="padding-top:12px;"><img src="${logoUrl}" width="130" style="width:130px;max-width:130px;display:inline-block;" alt="Canablue"><div style="padding-top:8px;">${viewBtn}</div><div style="padding-top:8px;">${socials}</div></td>
 </tr></tbody></table></td></tr>${extras}${legal}</tbody></table>`;
   }
@@ -133,7 +156,7 @@ async function buildHTML() {
 <tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:16px 22px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
 <td valign="top" width="55%"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
 <td valign="top" align="right"><img src="${logoUrl}" width="125" style="width:125px;display:inline-block;" alt="Canablue"><div style="margin-top:10px;">${viewBtn}</div><div style="margin-top:10px;">${socials}</div></td>
-</tr></tbody></table>${extras}${certs}${legal}</td></tr></tbody></table>`;
+</tr></tbody></table>${certs}${legal}</td></tr></tbody></table>`;
   }
   if (s.tpl === 'banner') {
     const sqPhoto = s.vis.foto ? `<img src="${s.foto}" width="84" height="84" style="width:84px;height:84px;border-radius:50%;object-fit:cover;display:block;border:3px solid #ffffff;" alt="${s.nombre}">` : '';
@@ -146,7 +169,7 @@ async function buildHTML() {
 <td valign="top" width="56%"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
 <td valign="middle" align="center"><div>${viewBtn}</div><div style="margin-top:12px;">${socials}</div><div style="margin-top:12px;"><img src="${logoUrl}" width="115" style="width:115px;display:inline-block;" alt="Canablue"></div></td>
 </tr></tbody></table></td></tr>
-<tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:0 22px 18px;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${extras}${legal}</table></td></tr>
+<tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:0 22px 18px;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td></tr>
 </tbody></table>`;
   }
   if (s.tpl === 'sidebar') {
@@ -161,7 +184,7 @@ async function buildHTML() {
 <table cellpadding="0" cellspacing="0" border="0">${rows}</table>
 <div style="margin-top:12px;">${viewBtn}</div>
 <div style="margin-top:14px;"><img src="${logoUrl}" width="120" style="width:120px;display:inline-block;" alt="Canablue"></div>
-<table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${extras}${legal}</table></td>
+<table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td>
 </tr></tbody></table>`;
   }
   if (s.tpl === 'photo-left') {
@@ -175,7 +198,7 @@ async function buildHTML() {
 <table cellpadding="0" cellspacing="0" border="0">${rows}</table>
 <div style="margin-top:10px;">${viewBtn}</div></td>
 </tr>
-<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${extras}${legal}</table></td></tr>
+<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td></tr>
 </tbody></table>`;
   }
   if (s.tpl === 'photo-top') {
@@ -187,7 +210,7 @@ async function buildHTML() {
 <td valign="top"><table cellpadding="0" cellspacing="0" border="0">${rows}</table><div style="margin-top:10px;">${viewBtn}</div></td>
 <td valign="top" align="right"><img src="${logoUrl}" width="130" style="width:130px;display:inline-block;" alt="Canablue"><div style="margin-top:10px;">${socials}</div></td>
 </tr></tbody></table></td></tr>
-<tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${extras}${legal}</table></td></tr>
+<tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td></tr>
 <tr><td style="padding-top:12px;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div></td></tr>
 </tbody></table>`;
   }
@@ -202,7 +225,7 @@ async function buildHTML() {
 <div style="margin-top:12px;"><img src="${logoUrl}" width="120" style="width:120px;display:inline-block;" alt="Canablue"></div>
 <div style="margin-top:10px;">${socials}</div></td>
 </tr>
-<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${extras}${legal}</table></td></tr>
+<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td></tr>
 </tbody></table>`;
   }
   // Main template
@@ -217,7 +240,7 @@ async function buildHTML() {
 <tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
 <td valign="middle"><table cellpadding="0" cellspacing="0" border="0"><tbody><tr><td valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td><td width="14"></td><td valign="middle">${viewBtn}</td></tr></tbody></table></td>
 <td align="right" valign="middle">${socials}</td></tr></tbody></table></td></tr>
-${certs}${extras}${legal}</tbody></table>`;
+${certs}${legal}</tbody></table>`;
 }
 
 async function render() {
@@ -236,7 +259,8 @@ function syncStateFromInputs() {
   state.instagram = $('fInstagram').value; state.whatsapp = $('fWhatsapp').value;
   state.foto = $('fFoto').value; state.logo = $('fLogo').value;
   state.certs = { crs: $('cCRS').checked, aei: $('cAEI').checked, realtor: $('cRealtor').checked, sr23: $('cSR23').checked, sr24: $('cSR24').checked, lux: $('cLux').checked };
-  state.certUrls = { crs: $('fCertCRS').value, aei: $('fCertAEI').value, realtor: $('fCertRealtor').value, sr23: $('fCertSR23').value, sr24: $('fCertSR24').value, lux: $('fCertLux').value };
+  state.certLinks = { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value };
+  state.customCerts = [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link);
   state.vis = { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, certs: $('vCerts').checked, legal: $('vLegal').checked };
   state.legal = $('fLegal').value;
   document.querySelectorAll('#tplGrid .tpl').forEach(b => b.classList.toggle('active', b.dataset.tpl === state.tpl));
@@ -265,13 +289,20 @@ async function download() {
   a.download = 'signature-' + state.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.html'; a.click();
 }
 
-function addLinkRow(label = '', url = '') {
+function addLinkRow(icon = 'facebook', url = '') {
   const d = document.createElement('div'); d.className = 'xlink';
-  d.innerHTML = `<input placeholder="Label, e.g. TikTok" value="${label}"><input placeholder="https://…" value="${url}"><button>✕</button>`;
-  const [li, ui, del] = d.querySelectorAll('input,input,button');
-  const sync = () => { state.extra = [...document.querySelectorAll('#extraLinks .xlink')].map(r => { const i = r.querySelectorAll('input'); return { label: i[0].value, url: i[1].value }; }).filter(e => e.label || e.url); render(); };
-  li.oninput = sync; ui.oninput = sync; del.onclick = () => { d.remove(); sync(); };
+  const opts = Object.keys(NETWORKS).map(k => `<option value="${k}"${k === icon ? ' selected' : ''}>${NETWORKS[k].label}</option>`).join('');
+  d.innerHTML = `<select>${opts}</select><input placeholder="https://…" value="${url || ''}"><button>✕</button>`;
+  const sync = () => { state.extra = [...document.querySelectorAll('#extraLinks .xlink')].map(r => ({ icon: r.querySelector('select').value, url: r.querySelector('input').value })).filter(e => e.url); render(); };
+  d.querySelector('select').onchange = sync; d.querySelector('input').oninput = sync; d.querySelector('button').onclick = () => { d.remove(); sync(); };
   $('extraLinks').appendChild(d);
+}
+function addCertRow(img = '', link = '') {
+  const d = document.createElement('div'); d.className = 'xlink';
+  d.innerHTML = `<input placeholder="Logo image URL (PNG)" value="${img || ''}"><input placeholder="Click-through link (optional)" value="${link || ''}"><button>✕</button>`;
+  const sync = () => { state.customCerts = [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link); render(); };
+  d.querySelectorAll('input').forEach(i => i.oninput = sync); d.querySelector('button').onclick = () => { d.remove(); sync(); };
+  $('customCerts').appendChild(d);
 }
 
 const MAPS_DEFAULT = 'https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111';
@@ -356,6 +387,9 @@ function collectAgent(key) {
     dir: $('fDir').value, dirUrl: $('fDirUrl').value, listings: $('fListings').value,
     linkedin: $('fLinkedin').value, instagram: $('fInstagram').value, whatsapp: $('fWhatsapp').value,
     foto: $('fFoto').value, logo: $('fLogo').value,
+    extra: [...document.querySelectorAll('#extraLinks .xlink')].map(r => ({ icon: r.querySelector('select').value, url: r.querySelector('input').value })).filter(e => e.url),
+    certLinks: { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value },
+    customCerts: [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link),
     certs: { crs: $('cCRS').checked, aei: $('cAEI').checked, realtor: $('cRealtor').checked, sr23: $('cSR23').checked, sr24: $('cSR24').checked, lux: $('cLux').checked }
   };
 }
@@ -373,6 +407,12 @@ function applyAgent(a) {
   if (ct.sr23 !== undefined) $('cSR23').checked = !!ct.sr23;
   if (ct.sr24 !== undefined) $('cSR24').checked = !!ct.sr24;
   if (ct.lux !== undefined) $('cLux').checked = !!ct.lux;
+  const linkIds = { crs: 'fLinkCRS', aei: 'fLinkAEI', realtor: 'fLinkRealtor', sr23: 'fLinkSR23', sr24: 'fLinkSR24', lux: 'fLinkLux' };
+  for (const k in linkIds) { const el = $(linkIds[k]); if (el) el.value = (a.certLinks && a.certLinks[k]) || ''; }
+  document.querySelectorAll('#extraLinks .xlink').forEach(n => n.remove());
+  (a.extra || []).forEach(x => addLinkRow(x.icon, x.url));
+  document.querySelectorAll('#customCerts .xlink').forEach(n => n.remove());
+  (a.customCerts || []).forEach(x => addCertRow(x.img, x.link));
   $('agentSearch').value = a.name || '';
 }
 function saveCurrentAgent() {
@@ -443,13 +483,14 @@ function renderAgentList(filter = '') {
 
 document.querySelectorAll('#tplGrid .tpl').forEach(b => b.onclick = () => { state.tpl = b.dataset.tpl; render(); });
 document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; render(); });
-['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fCertCRS','fCertAEI','fCertRealtor','fCertSR23','fCertSR24','fCertLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', render));
+['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', render));
 $('fColorHex').addEventListener('change', e => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('fColor').value = e.target.value; render(); });
 $('fFotoFile').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
   const fr = new FileReader(); fr.onload = () => { $('fFoto').value = fr.result; render(); toast('Photo loaded (for the final email use a public https link).'); }; fr.readAsDataURL(f);
 });
 $('btnAddLink').onclick = () => addLinkRow();
+$('btnAddCert').onclick = () => addCertRow();
 $('btnCopyRich').onclick = copyRich; $('btnCopyHtml').onclick = copyHtml; $('btnDownload').onclick = download;
 $('agentSearch').addEventListener('focus', e => { renderAgentList(e.target.value); $('agentList').classList.remove('hidden'); });
 $('agentSearch').addEventListener('input', e => { renderAgentList(e.target.value); $('agentList').classList.remove('hidden'); });

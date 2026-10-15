@@ -105,7 +105,7 @@
         <div><label class="lbl">Instagram URL</label><input id="fInstagram" value="https://www.instagram.com/pamela_canablue.rd"></div>
         <div><label class="lbl">WhatsApp (wa.me link)</label><input id="fWhatsapp" value="https://wa.me/18096080943"></div>
       </div>
-      <label class="lbl">Extra links</label>
+      <label class="lbl">Extra links (pick a logo + paste its URL)</label>
       <div id="extraLinks"></div>
       <button id="btnAddLink" class="btn small dashed">+ Add link</button>
     </section>
@@ -133,19 +133,22 @@
       <div class="cert-preview">
         <img src="assets/cert-crs.png" alt="CRS"><img src="assets/cert-aei.png" alt="AEI"><img src="assets/cert-realtor.png" alt="REALTOR"><img src="assets/cert-best-of-dr-2023.png" alt="Best of DR 2023"><img src="assets/cert-best-of-dr-2024.png" alt="Best of DR 2024"><img src="assets/cert-luxury-homes.png" alt="Luxury">
       </div>
-      <p class="hint">Upload these PNGs (root folder: <b>cert-CRS.png</b>, <b>cert-AEI.png</b>, <b>cert-REALTOR.png</b>, <b>cert-Best-of-DR-2023.png</b>, <b>cert-Best-of-DR-2024.png</b>, <b>cert-Luxury-Homes-Expert.png</b>) to your hosting and paste each link below.</p>
-      <label class="lbl">CRS logo URL</label>
-      <input id="fCertCRS" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-CRS.png">
-      <label class="lbl">AEI logo URL</label>
-      <input id="fCertAEI" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-AEI.png">
-      <label class="lbl">REALTOR® logo URL</label>
-      <input id="fCertRealtor" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-REALTOR.png">
-      <label class="lbl">Best of DR 2023 logo URL</label>
-      <input id="fCertSR23" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Best-of-DR-2023.png">
-      <label class="lbl">Best of DR 2024 logo URL</label>
-      <input id="fCertSR24" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Best-of-DR-2024.png">
-      <label class="lbl">Luxury Homes Expert logo URL</label>
-      <input id="fCertLux" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Luxury-Homes-Expert.png">
+      <p class="hint">Standard logos are built in. Optionally add a click-through link per certification.</p>
+      <div class="grid2">
+        <div><label class="lbl">CRS link</label><input id="fLinkCRS" placeholder="https://…"></div>
+        <div><label class="lbl">AEI link</label><input id="fLinkAEI" placeholder="https://…"></div>
+      </div>
+      <div class="grid2">
+        <div><label class="lbl">REALTOR® link</label><input id="fLinkRealtor" placeholder="https://…"></div>
+        <div><label class="lbl">Best of DR 2023 link</label><input id="fLinkSR23" placeholder="https://…"></div>
+      </div>
+      <div class="grid2">
+        <div><label class="lbl">Best of DR 2024 link</label><input id="fLinkSR24" placeholder="https://…"></div>
+        <div><label class="lbl">Luxury Homes link</label><input id="fLinkLux" placeholder="https://…"></div>
+      </div>
+      <label class="lbl">Custom certifications (any logo + link)</label>
+      <div id="customCerts"></div>
+      <button id="btnAddCert" class="btn small dashed">+ Add certification</button>
     </section>
 
     <section class="card">

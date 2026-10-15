@@ -81,6 +81,7 @@ textarea{resize:vertical}
 .cert-preview{display:flex;gap:8px;margin-top:10px}
 .cert-preview img{height:32px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px 4px}
 .xlink{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px}
+.xlink select{border:1px solid var(--line);border-radius:8px;padding:8px;font-size:13px;background:#fff;font-family:inherit}
 .xlink button{border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer}
 .preview-col{min-width:0}
 .preview-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
