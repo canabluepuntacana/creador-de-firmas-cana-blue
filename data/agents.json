@@ -15,6 +15,7 @@
     "whatsapp": "https://wa.me/18096080943",
     "foto": "https://res.cloudinary.com/ybkuwivn/image/upload/v1792087360/Firmas_de_correo_Electronico_pamela.png",
     "iconStyle": "solid",
+    "certsAlign": "center",
     "certs": { "crs": true, "aei": true, "realtor": true, "sr23": true, "sr24": true, "lux": false }
   },
   {
@@ -33,6 +34,7 @@
     "whatsapp": "https://wa.me/18492552500",
     "foto": "https://res.cloudinary.com/ybkuwivn/image/upload/v1792072332/Screenshot_2026-10-15_095141.png",
     "iconStyle": "solid",
+    "certsAlign": "center",
     "certs": { "crs": false, "aei": false, "realtor": false, "sr23": false, "sr24": true, "lux": false }
   }
 ]

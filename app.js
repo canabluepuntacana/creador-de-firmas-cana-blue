@@ -16,6 +16,7 @@ const state = {
   certs: { crs: true, aei: true, realtor: true, sr23: true, sr24: true, lux: false },
   certLinks: { crs: '', aei: '', realtor: '', sr23: '', sr24: '', lux: '' },
   customCerts: [],
+  certsAlign: 'center',
   extra: [],
   iconStyle: 'solid',
   vis: { foto: true, zona: true, social: true, certs: true, legal: true },
@@ -117,11 +118,11 @@ function certImgs(certs, links, customs, h) {
   (customs || []).filter(x => x.img).forEach(x => out.push(certImgTag(x.img, 'Certification', x.link, h)));
   return out;
 }
-function certsRow(certs, links, customs, vis) {
+function certsRow(certs, links, customs, vis, align) {
   if (!vis.certs) return '';
   const imgs = certImgs(certs, links, customs, 30);
   if (!imgs.length) return '';
-  return `<tr><td align="center" style="padding-top:12px;"><div>${imgs.join('&nbsp;&nbsp;')}</div></td></tr>`;
+  return `<tr><td align="${align || 'center'}" style="padding-top:12px;"><div>${imgs.join('&nbsp;&nbsp;')}</div></td></tr>`;
 }
 /* Extra links render as social circles appended to `socials` (see above). */
 
@@ -142,6 +143,7 @@ async function buildHTML() {
 
   // Social circles only: Instagram (outline glyph) / WhatsApp (flat) / LinkedIn.
   const ist = s.iconStyle || 'solid';
+  const cal = ['left', 'center', 'right'].includes(s.certsAlign) ? s.certsAlign : 'center';
   let socials = !s.vis.social ? '' :
     socialIcon(s.instagram, 'instagram', ist, c) + '&nbsp;' +
     socialIcon(s.whatsapp, 'whatsapp', ist, c) + '&nbsp;' +
@@ -155,7 +157,7 @@ async function buildHTML() {
     ? `<tr><td style="padding-top:12px;font-size:10px;line-height:14px;color:#8a94a8;text-align:center;font-family:Arial,Helvetica,sans-serif;max-width:560px;">${s.legal}</td></tr>` : '';
   const viewBtn = viewPropsBtn(s.listings, c);
 
-  const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis);
+  const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign);
   const zona = (s.vis.zona && s.zona) ? zonaText(s.zona) : '';
 
   if (s.tpl === 'broker') {
@@ -166,7 +168,7 @@ async function buildHTML() {
 <td width="1" style="background-color:${c};width:1px;font-size:0;">&nbsp;</td><td width="20"></td>
 <td valign="top"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr>
 <tr><td colspan="4"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:14px;border-top:1px solid ${c};"><tbody><tr>
-<td valign="middle" align="center" style="padding-top:12px;">${s.vis.certs ? certImgs(s.certs, s.certLinks, s.customCerts, 28).join('&nbsp;') : ''}</td>
+<td valign="middle" align="${cal}" style="padding-top:12px;">${s.vis.certs ? certImgs(s.certs, s.certLinks, s.customCerts, 28).join('&nbsp;') : ''}</td>
 <td align="right" valign="middle" style="padding-top:12px;"><img src="${logoUrl}" width="130" style="width:130px;max-width:130px;display:inline-block;" alt="Canablue"><div style="padding-top:8px;">${viewBtn}</div><div style="padding-top:8px;">${socials}</div></td>
 </tr></tbody></table></td></tr>${legal}</tbody></table>`;
   }
@@ -351,6 +353,10 @@ function iconPicker(selected, onPick) {
   if (!ipickBound) { ipickBound = true; document.addEventListener('click', hideFloatMenus); document.addEventListener('scroll', hideFloatMenus, true); window.addEventListener('resize', hideFloatMenus); }
   return wrap;
 }
+function setCertsAlign(a) {
+  state.certsAlign = ['left', 'center', 'right'].includes(a) ? a : 'center';
+  document.querySelectorAll('#certsAlignSeg button').forEach(b => b.classList.toggle('on', b.dataset.a === state.certsAlign));
+}
 function setIconStyle(s) {
   state.iconStyle = ['solid', 'rounded', 'outline', 'frame', 'line', 'soft'].includes(s) ? s : 'solid';
   document.querySelectorAll('#iconStyleSeg button').forEach(b => b.classList.toggle('on', b.dataset.s === state.iconStyle));
@@ -415,7 +421,8 @@ async function loadSheetAgents(id) {
       instagram: o.instagram || '', whatsapp: o.whatsapp || '',
       foto: o.foto || '', logo: o.logo || '',
       certs: { crs: B(o.crs), aei: B(o.aei), realtor: B(o.realtor), sr23: B(o.sr23), sr24: B(o.sr24), lux: o.lux == null ? false : B(o.lux) },
-      iconStyle: ['solid', 'rounded', 'outline', 'frame', 'line', 'soft'].includes(String(o.iconstyle || '').toLowerCase()) ? String(o.iconstyle).toLowerCase() : 'solid'
+      iconStyle: ['solid', 'rounded', 'outline', 'frame', 'line', 'soft'].includes(String(o.iconstyle || '').toLowerCase()) ? String(o.iconstyle).toLowerCase() : 'solid',
+      certsAlign: ['left', 'center', 'right'].includes(String(o.certsalign || '').toLowerCase()) ? String(o.certsalign).toLowerCase() : 'center'
     };
   }).filter(a => a.name);
 }
@@ -459,6 +466,7 @@ function collectAgent(key) {
     foto: $('fFoto').value, logo: $('fLogo').value,
     extra: [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value })).filter(e => e.url),
     iconStyle: state.iconStyle,
+    certsAlign: state.certsAlign,
     certLinks: { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value },
     customCerts: [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link),
     certs: { crs: $('cCRS').checked, aei: $('cAEI').checked, realtor: $('cRealtor').checked, sr23: $('cSR23').checked, sr24: $('cSR24').checked, lux: $('cLux').checked }
@@ -483,6 +491,7 @@ function applyAgent(a) {
   document.querySelectorAll('#extraLinks .xlink-net').forEach(n => n.remove());
   (a.extra || []).forEach(x => addLinkRow(x.icon, x.url));
   setIconStyle(a.iconStyle || 'solid');
+  setCertsAlign(a.certsAlign || 'center');
   document.querySelectorAll('#customCerts .xlink').forEach(n => n.remove());
   (a.customCerts || []).forEach(x => addCertRow(x.img, x.link));
   $('agentSearch').value = a.name || '';
@@ -553,6 +562,7 @@ function renderAgentList(filter = '') {
   });
 }
 
+document.querySelectorAll('#certsAlignSeg button').forEach(b => b.onclick = () => { setCertsAlign(b.dataset.a); render(); });
 document.querySelectorAll('#iconStyleSeg button').forEach(b => b.onclick = () => { setIconStyle(b.dataset.s); render(); });
 document.querySelectorAll('.rail button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.rail button').forEach(x => x.classList.toggle('on', x === b));
