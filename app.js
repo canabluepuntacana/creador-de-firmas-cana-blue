@@ -13,7 +13,7 @@ const state = {
   whatsapp: 'https://wa.me/18096080943',
   foto: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792087360/Firmas_de_correo_Electronico_pamela.png',
   logo: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792071937/10._logo-blue-google.png',
-  certs: { crs: true, aei: true, realtor: true, sr23: false, sr24: true, lux: true },
+  certs: { crs: true, aei: true, realtor: true, sr23: true, sr24: true, lux: false },
   certLinks: { crs: '', aei: '', realtor: '', sr23: '', sr24: '', lux: '' },
   customCerts: [],
   extra: [],
@@ -377,14 +377,14 @@ function addCertRow(img = '', link = '') {
 const MAPS_DEFAULT = 'https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111';
 const DIR_DEFAULT = 'Local P104, Plaza San Juan Shopping Center, Bávaro, Punta Cana';
 const BUILTIN_AGENTS = [
-  { key: 'pamela', name: 'Pamela Núñez', role: 'Broker Owner', zona: 'Punta Cana · Cap Cana', tel: '+1 (809) 975-3900', email: 'pamela@canablue.com', web: 'canablue.com', dir: DIR_DEFAULT, dirUrl: MAPS_DEFAULT, instagram: 'https://www.instagram.com/pamela_canablue.rd', whatsapp: 'https://wa.me/18096080943', foto: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792087360/Firmas_de_correo_Electronico_pamela.png', listings: 'https://canablue.com/author/pamepam/', linkedin: 'https://do.linkedin.com/in/pamela-nunez-0280814a', certs: { crs: true, aei: true, realtor: true } },
-  { key: 'candy', name: 'Candy Vander Horst', role: 'Sales | Rentals', zona: 'Bávaro · Punta Cana', tel: '+1 (849) 255-2500', email: 'candy@canablue.com', web: 'canablue.com', dir: DIR_DEFAULT, dirUrl: MAPS_DEFAULT, instagram: 'https://www.instagram.com/candy_canablue.rd', whatsapp: 'https://wa.me/18492552500', foto: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792072332/Screenshot_2026-10-15_095141.png', listings: 'https://canablue.com/agents/candy-vander-horst', linkedin: 'https://linkedin.com/in/candy-vander-horst', certs: { crs: false, aei: false, realtor: false } }
+  { key: 'pamela', name: 'Pamela Núñez', role: 'Broker Owner', zona: 'Punta Cana · Cap Cana', tel: '+1 (809) 975-3900', email: 'pamela@canablue.com', web: 'canablue.com', dir: DIR_DEFAULT, dirUrl: MAPS_DEFAULT, instagram: 'https://www.instagram.com/pamela_canablue.rd', whatsapp: 'https://wa.me/18096080943', foto: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792087360/Firmas_de_correo_Electronico_pamela.png', listings: 'https://canablue.com/author/pamepam/', linkedin: 'https://do.linkedin.com/in/pamela-nunez-0280814a', certs: { crs: true, aei: true, realtor: true, sr23: true, sr24: true, lux: false } },
+  { key: 'candy', name: 'Candy Vander Horst', role: 'Sales | Rentals', zona: 'Bávaro · Punta Cana', tel: '+1 (849) 255-2500', email: 'candy@canablue.com', web: 'canablue.com', dir: DIR_DEFAULT, dirUrl: MAPS_DEFAULT, instagram: 'https://www.instagram.com/candy_canablue.rd', whatsapp: 'https://wa.me/18492552500', foto: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792072332/Screenshot_2026-10-15_095141.png', listings: 'https://canablue.com/agents/candy-vander-horst', linkedin: 'https://linkedin.com/in/candy-vander-horst', certs: { crs: false, aei: false, realtor: false, sr23: false, sr24: true, lux: false } }
 ];
 let AGENTS = BUILTIN_AGENTS.slice();
 let JSON_AGENTS = [];
 // ---- Static-page persistence: data/agents.json (shared source of truth, via fetch)
 // + localStorage (per-browser autosave + custom agents). ----
-const LS_FORM = 'canablue.form.v1', LS_CUSTOM = 'canablue.agents.custom.v1';
+const LS_FORM = 'canablue.form.v2', LS_CUSTOM = 'canablue.agents.custom.v1';
 const getCustoms = () => { try { return JSON.parse(localStorage.getItem(LS_CUSTOM) || '[]'); } catch { return []; } };
 const setCustoms = c => localStorage.setItem(LS_CUSTOM, JSON.stringify(c));
 const isCustom = key => getCustoms().some(x => x.key === key);
@@ -414,7 +414,7 @@ async function loadSheetAgents(id) {
       listings: o.listings || '', linkedin: o.linkedin || '',
       instagram: o.instagram || '', whatsapp: o.whatsapp || '',
       foto: o.foto || '', logo: o.logo || '',
-      certs: { crs: B(o.crs), aei: B(o.aei), realtor: B(o.realtor), sr23: B(o.sr23), sr24: B(o.sr24), lux: o.lux == null ? true : B(o.lux) },
+      certs: { crs: B(o.crs), aei: B(o.aei), realtor: B(o.realtor), sr23: B(o.sr23), sr24: B(o.sr24), lux: o.lux == null ? false : B(o.lux) },
       iconStyle: ['solid', 'rounded', 'outline', 'frame', 'line', 'soft'].includes(String(o.iconstyle || '').toLowerCase()) ? String(o.iconstyle).toLowerCase() : 'solid'
     };
   }).filter(a => a.name);

@@ -119,7 +119,7 @@ textarea{resize:vertical}
 .seg .demo img{width:13px;height:13px;display:block}
 .xlink button{border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer}
 .preview-col{min-width:0}
-.preview-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.preview-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px}
 .preview-box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px;overflow:auto}
 #sigPreview{display:flex;justify-content:center}
 .switch{font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer}
