@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signature Creator · Canablue</title>
+<link href="https://fonts.cdnfonts.com/css/google-sans" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <img src="assets/logo-canablue.png" alt="Canablue" id="brandLogo">
+    <div>
+      <strong>Signature Creator</strong>
+      <span>Canablue · Real Estate Made Easy</span>
+    </div>
+  </div>
+  <div class="top-actions">
+    <button id="btnCopyRich" class="btn primary"><iconify-icon icon="mdi:content-copy"></iconify-icon> Copy signature</button>
+    <button id="btnCopyHtml" class="btn"><iconify-icon icon="mdi:code-tags"></iconify-icon> Copy HTML</button>
+    <button id="btnDownload" class="btn"><iconify-icon icon="mdi:download"></iconify-icon> Download</button>
+  </div>
+</header>
+
+<main class="layout">
+  <!-- ============ EDITOR ============ -->
+  <aside class="editor">
+    <section class="card">
+      <h3><iconify-icon icon="mdi:palette"></iconify-icon> Template &amp; color</h3>
+      <label class="lbl">Template</label>
+      <div class="tpl-grid" id="tplGrid">
+        <button data-tpl="principal" class="tpl active"><span class="sk"><span class="sk-row"><span class="ph"><iconify-icon icon="mdi:account" width="16"></iconify-icon></span><span class="bars"><i class="bar" style="width:75%"></i><i class="bar" style="width:55%"></i></span><span class="vdiv"></span><span class="bars"><i class="bar"></i><i class="bar" style="width:80%"></i><i class="bar" style="width:60%"></i></span></span><span class="divv"></span><span class="sk-row between"><span class="logo"></span><span class="dots"><i></i><i></i><i></i></span></span></span><span class="tname">Main</span></button>
+        <button data-tpl="broker" class="tpl"><span class="sk"><span class="sk-row"><span class="col center" style="width:38%"><span class="ph"><iconify-icon icon="mdi:account" width="16"></iconify-icon></span><i class="bar" style="width:92%;margin-top:5px"></i><i class="bar" style="width:66%"></i></span><span class="vdiv"></span><span class="bars"><i class="bar"></i><i class="bar" style="width:90%"></i><i class="bar" style="width:75%"></i><i class="bar" style="width:62%"></i></span></span><span class="divv"></span><span class="sk-row between"><span class="dots"><i></i><i></i><i></i></span><span class="logo"></span></span></span><span class="tname">Broker</span></button>
+        <button data-tpl="moderna" class="tpl"><span class="sk"><span class="band"><span class="sk-row"><span class="bars"><i class="bar wh" style="width:60%"></i><i class="bar wh" style="width:42%"></i></span><span class="ph sm"><iconify-icon icon="mdi:account" width="13"></iconify-icon></span></span></span><span class="sk-row air"><span class="bars"><i class="bar"></i><i class="bar" style="width:85%"></i><i class="bar" style="width:70%"></i></span><span class="col" style="align-items:flex-end;gap:5px"><span class="logo"></span><span class="dots"><i></i><i></i><i></i></span></span></span></span><span class="tname">Compact</span></button>
+        <button data-tpl="banner" class="tpl"><span class="sk"><span class="band"><span class="sk-row"><span class="ph sm"><iconify-icon icon="mdi:account" width="13"></iconify-icon></span><span class="bars"><i class="bar wh" style="width:68%"></i><i class="bar wh" style="width:48%"></i></span></span></span><span class="sk-row air"><span class="bars"><i class="bar"></i><i class="bar" style="width:85%"></i><i class="bar" style="width:70%"></i></span><span class="col center" style="gap:5px"><span class="pill"></span><span class="dots"><i></i><i></i><i></i></span></span></span></span><span class="tname">Banner</span></button>
+        <button data-tpl="sidebar" class="tpl"><span class="sk"><span class="sk-row"><span class="side"><span class="ph sm"><iconify-icon icon="mdi:account" width="13"></iconify-icon></span><i class="bar wh" style="width:90%;margin-top:4px"></i><i class="bar wh" style="width:70%"></i></span><span class="bars"><i class="bar"></i><i class="bar" style="width:85%"></i><i class="bar" style="width:70%"></i><span class="pill" style="margin-top:2px"></span></span></span></span><span class="tname">Dark Sidebar</span></button>
+        <button data-tpl="photo-left" class="tpl"><span class="sk"><span class="sk-row"><span class="col"><span class="ph"><iconify-icon icon="mdi:account" width="16"></iconify-icon></span><span class="logo" style="margin-top:5px"></span><span class="dots" style="margin-top:4px"><i></i><i></i></span></span><span class="bars"><i class="bar" style="width:70%"></i><i class="bar" style="width:50%"></i><span class="divv"></span><i class="bar"></i><i class="bar" style="width:80%"></i></span></span></span><span class="tname">Photo Left</span></button>
+        <button data-tpl="photo-top" class="tpl"><span class="sk"><span class="col center"><span class="ph"><iconify-icon icon="mdi:account" width="16"></iconify-icon></span><i class="bar" style="width:48%;margin-top:4px"></i><i class="bar" style="width:34%"></i></span><span class="divv"></span><span class="sk-row"><span class="bars"><i class="bar"></i><i class="bar" style="width:80%"></i></span><span class="col" style="align-items:flex-end"><span class="logo"></span><span class="dots" style="margin-top:4px"><i></i><i></i></span></span></span><span class="divv"></span></span><span class="tname">Photo Top</span></button>
+        <button data-tpl="photo-right" class="tpl"><span class="sk"><span class="sk-row"><span class="bars"><i class="bar" style="width:70%"></i><i class="bar" style="width:50%"></i><span class="divv"></span><i class="bar"></i><i class="bar" style="width:80%"></i></span><span class="col"><span class="ph"><iconify-icon icon="mdi:account" width="16"></iconify-icon></span><span class="logo" style="margin-top:5px"></span></span></span></span><span class="tname">Photo Right</span></button>
+      </div>
+      <div class="row2">
+        <div>
+          <label class="lbl">Primary color</label>
+          <div class="color-row">
+            <input type="color" id="fColor" value="#174176">
+            <input type="text" id="fColorHex" value="#174176" maxlength="7">
+          </div>
+          <div class="swatches">
+            <button data-c="#174176" style="background:#174176" title="Cana Blue"></button>
+            <button data-c="#0A1F44" style="background:#0A1F44" title="Navy"></button>
+            <button data-c="#0E5A6D" style="background:#0E5A6D" title="Ocean"></button>
+            <button data-c="#8C6A2F" style="background:#8C6A2F" title="Sand / Luxury"></button>
+          </div>
+        </div>
+        <div>
+          <label class="lbl">Agent</label>
+          <div class="agent-select">
+            <input id="agentSearch" value="Pamela Núñez" placeholder="Search agent..." autocomplete="off">
+            <div id="agentList" class="agent-list hidden"></div>
+          </div>
+          <p class="hint">Search and pick an agent to autofill every field.</p>
+          <div class="row-btns">
+            <button id="btnSaveAgent" class="btn small primary">Save agent</button>
+            <button id="btnExportAgents" class="btn small">Export JSON</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3><iconify-icon icon="mdi:account"></iconify-icon> Agent details</h3>
+      <div class="grid2">
+        <div><label class="lbl">Name</label><input id="fNombre" value="Pamela Núñez"></div>
+        <div><label class="lbl">Title</label><input id="fCargo" value="Broker Owner"></div>
+      </div>
+      <label class="lbl">Area of expertise</label>
+      <input id="fZona" value="Punta Cana · Cap Cana">
+      <div class="grid2">
+        <div><label class="lbl">Phone</label><input id="fTel" value="+1 (809) 975-3900"></div>
+        <div><label class="lbl">Email</label><input id="fEmail" value="pamela@canablue.com"></div>
+      </div>
+      <div class="grid2">
+        <div><label class="lbl">Website</label><input id="fWeb" value="canablue.com"></div>
+        <div><label class="lbl">Address</label><input id="fDir" value="Local P104, Plaza San Juan Shopping Center, Bávaro, Punta Cana"></div>
+      </div>
+      <label class="lbl">Address link (Google Maps — opens on click)</label>
+      <input id="fDirUrl" value="https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111">
+    </section>
+
+    <section class="card">
+      <h3><iconify-icon icon="mdi:link-variant"></iconify-icon> Links</h3>
+      <label class="lbl">My listings URL (View My Listings button)</label>
+      <input id="fListings" value="https://canablue.com/author/pamepam/">
+      <label class="lbl">LinkedIn URL</label>
+      <input id="fLinkedin" value="https://do.linkedin.com/in/pamela-nunez-0280814a">
+      <div class="grid2">
+        <div><label class="lbl">Instagram URL</label><input id="fInstagram" value="https://www.instagram.com/pamela_canablue.rd"></div>
+        <div><label class="lbl">WhatsApp (wa.me link)</label><input id="fWhatsapp" value="https://wa.me/18096080943"></div>
+      </div>
+      <label class="lbl">Extra links</label>
+      <div id="extraLinks"></div>
+      <button id="btnAddLink" class="btn small dashed">+ Add link</button>
+    </section>
+
+    <section class="card">
+      <h3><iconify-icon icon="mdi:image"></iconify-icon> Photo &amp; logo</h3>
+      <label class="lbl">Photo URL (circular)</label>
+      <input id="fFoto" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792087360/Firmas_de_correo_Electronico_pamela.png">
+      <input type="file" id="fFotoFile" accept="image/*">
+      <label class="lbl">Logo URL</label>
+      <input id="fLogo" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792071937/10._logo-blue-google.png">
+      <p class="hint">Tip: upload the photo to Cloudinary / your website and paste the public https link so it loads in Gmail / Outlook.</p>
+    </section>
+
+    <section class="card">
+      <h3><iconify-icon icon="mdi:medal"></iconify-icon> Certifications</h3>
+      <div class="checks">
+        <label><input type="checkbox" id="cCRS" checked> CRS</label>
+        <label><input type="checkbox" id="cAEI" checked> AEI</label>
+        <label><input type="checkbox" id="cRealtor" checked> REALTOR®</label>
+        <label><input type="checkbox" id="cSR23"> Best of DR 2023</label>
+        <label><input type="checkbox" id="cSR24" checked> Best of DR 2024</label>
+        <label><input type="checkbox" id="cLux" checked> Luxury Homes Expert</label>
+      </div>
+      <div class="cert-preview">
+        <img src="assets/cert-crs.png" alt="CRS"><img src="assets/cert-aei.png" alt="AEI"><img src="assets/cert-realtor.png" alt="REALTOR"><img src="assets/cert-best-of-dr-2023.png" alt="Best of DR 2023"><img src="assets/cert-best-of-dr-2024.png" alt="Best of DR 2024"><img src="assets/cert-luxury-homes.png" alt="Luxury">
+      </div>
+      <p class="hint">Upload these PNGs (root folder: <b>cert-CRS.png</b>, <b>cert-AEI.png</b>, <b>cert-REALTOR.png</b>, <b>cert-Best-of-DR-2023.png</b>, <b>cert-Best-of-DR-2024.png</b>, <b>cert-Luxury-Homes-Expert.png</b>) to your hosting and paste each link below.</p>
+      <label class="lbl">CRS logo URL</label>
+      <input id="fCertCRS" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-CRS.png">
+      <label class="lbl">AEI logo URL</label>
+      <input id="fCertAEI" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-AEI.png">
+      <label class="lbl">REALTOR® logo URL</label>
+      <input id="fCertRealtor" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-REALTOR.png">
+      <label class="lbl">Best of DR 2023 logo URL</label>
+      <input id="fCertSR23" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Best-of-DR-2023.png">
+      <label class="lbl">Best of DR 2024 logo URL</label>
+      <input id="fCertSR24" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Best-of-DR-2024.png">
+      <label class="lbl">Luxury Homes Expert logo URL</label>
+      <input id="fCertLux" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-Luxury-Homes-Expert.png">
+    </section>
+
+    <section class="card">
+      <h3><iconify-icon icon="mdi:eye"></iconify-icon> Visibility</h3>
+      <div class="checks col">
+        <label><input type="checkbox" id="vFoto" checked> Show photo</label>
+        <label><input type="checkbox" id="vZona" checked> Show area of expertise</label>
+        <label><input type="checkbox" id="vSocial" checked> Show social icons (IG / WhatsApp / LinkedIn)</label>
+        <label><input type="checkbox" id="vCerts" checked> Show certifications</label>
+        <label><input type="checkbox" id="vLegal" checked> Show legal notice</label>
+      </div>
+      <label class="lbl">Legal notice</label>
+      <textarea id="fLegal" rows="2">The information in this email is confidential and intended solely for its recipient.</textarea>
+    </section>
+  </aside>
+
+  <!-- ============ PREVIEW ============ -->
+  <section class="preview-col">
+    <div class="preview-toolbar">
+      <div>
+        <strong>Preview</strong>
+        <span class="hint">What you see is what pastes into Gmail / Outlook.</span>
+      </div>
+      <label class="switch"><input type="checkbox" id="toggleCode"> Show HTML code</label>
+    </div>
+    <div class="preview-box">
+      <div id="sigPreview"></div>
+    </div>
+    <pre id="codeBox" class="hidden"><code id="codeText"></code></pre>
+    <div class="steps">
+      <div><b>1.</b> Fill in the details and pick a template.</div>
+      <div><b>2.</b> Click <b>Copy signature</b>.</div>
+      <div><b>3.</b> Paste it in Gmail: Settings → See all settings → Signature → Create → Paste (Ctrl+V) → Save.</div>
+    </div>
+    <div id="toast" class="toast"></div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

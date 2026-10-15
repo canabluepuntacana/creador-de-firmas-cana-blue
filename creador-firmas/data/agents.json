@@ -1,0 +1,36 @@
+[
+  {
+    "key": "pamela",
+    "name": "Pamela Núñez",
+    "role": "Broker Owner",
+    "zona": "Punta Cana · Cap Cana",
+    "tel": "+1 (809) 975-3900",
+    "email": "pamela@canablue.com",
+    "web": "canablue.com",
+    "dir": "Local P104, Plaza San Juan Shopping Center, Bávaro, Punta Cana",
+    "dirUrl": "https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111",
+    "listings": "https://canablue.com/author/pamepam/",
+    "linkedin": "https://do.linkedin.com/in/pamela-nunez-0280814a",
+    "instagram": "https://www.instagram.com/pamela_canablue.rd",
+    "whatsapp": "https://wa.me/18096080943",
+    "foto": "https://res.cloudinary.com/ybkuwivn/image/upload/v1792087360/Firmas_de_correo_Electronico_pamela.png",
+    "certs": { "crs": true, "aei": true, "realtor": true, "sr23": false, "sr24": true, "lux": true }
+  },
+  {
+    "key": "candy",
+    "name": "Candy Vander Horst",
+    "role": "Sales | Rentals",
+    "zona": "Bávaro · Punta Cana",
+    "tel": "+1 (849) 255-2500",
+    "email": "candy@canablue.com",
+    "web": "canablue.com",
+    "dir": "Local P104, Plaza San Juan Shopping Center, Bávaro, Punta Cana",
+    "dirUrl": "https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111",
+    "listings": "https://canablue.com/agents/candy-vander-horst",
+    "linkedin": "https://linkedin.com/in/candy-vander-horst",
+    "instagram": "https://www.instagram.com/candy_canablue.rd",
+    "whatsapp": "https://wa.me/18492552500",
+    "foto": "https://res.cloudinary.com/ybkuwivn/image/upload/v1792072332/Screenshot_2026-10-15_095141.png",
+    "certs": { "crs": false, "aei": false, "realtor": false, "sr23": false, "sr24": true, "lux": true }
+  }
+]
