@@ -4,10 +4,12 @@ Signature creator for Canablue agents. Table-based, email-safe HTML output.
 
 ## Run
 
-Open `creador-firmas/index.html` in a browser, or serve the folder:
+Live site (GitHub Pages): https://canabluepuntacana.github.io/creador-de-firmas-cana-blue/
+
+Locally, open `index.html` in a browser, or serve the folder:
 
 ```bash
-npx serve creador-firmas
+npx serve .
 ```
 
 > `data/agents.json` loads via `fetch()`, so use http(s) — not `file://` — for the shared agents list (built-in fallback included).
@@ -32,7 +34,7 @@ git push -u origin main
 
 ## Agents persistence (static page)
 
-- `creador-firmas/data/agents.json` — shared source of truth, loaded with `fetch()`.
+- `data/agents.json` — shared source of truth, loaded with `fetch()`.
 - Browser `localStorage` — form autosave + custom agents saved with **Save agent**.
 - **Export JSON** downloads `agents.json` — replace the file and commit to publish.
 
