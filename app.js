@@ -76,6 +76,12 @@ async function toDataURL(url) {
   } catch { return url; }
 }
 const cleanHex = h => (h || '#174176').trim();
+const hexA = (hex, a) => {
+  const h = String(hex || '').replace('#', '');
+  const full = h.length === 3 ? h.split('').map(x => x + x).join('') : h;
+  const n = parseInt(full, 16) || 0;
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+};
 // Modern outline (line) icons, matching the Pamela reference. PNG = email-safe
 // (email clients block SVG/Iconify, so brand/official logos ship as PNG images).
 const lineIcon = (name, colorHex) => `https://img.icons8.com/ios/50/${colorHex.replace('#', '')}/${name}.png`;
@@ -162,7 +168,7 @@ async function buildHTML() {
 <tr><td colspan="4"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:14px;border-top:1px solid ${c};"><tbody><tr>
 <td valign="middle" align="center" style="padding-top:12px;">${s.vis.certs ? certImgs(s.certs, s.certLinks, s.customCerts, 28).join('&nbsp;') : ''}</td>
 <td align="right" valign="middle" style="padding-top:12px;"><img src="${logoUrl}" width="130" style="width:130px;max-width:130px;display:inline-block;" alt="Canablue"><div style="padding-top:8px;">${viewBtn}</div><div style="padding-top:8px;">${socials}</div></td>
-</tr></tbody></table></td></tr>${extras}${legal}</tbody></table>`;
+</tr></tbody></table></td></tr>${legal}</tbody></table>`;
   }
   if (s.tpl === 'moderna') {
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
