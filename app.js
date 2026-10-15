@@ -540,6 +540,10 @@ function renderAgentList(filter = '') {
 }
 
 document.querySelectorAll('#iconStyleSeg button').forEach(b => b.onclick = () => { setIconStyle(b.dataset.s); render(); });
+document.querySelectorAll('.rail button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.rail button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.editor .card').forEach(c => c.classList.toggle('show', c.id === b.dataset.sec));
+});
 document.querySelectorAll('#tplGrid .tpl').forEach(b => b.onclick = () => { state.tpl = b.dataset.tpl; render(); });
 document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; render(); });
 ['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', render));

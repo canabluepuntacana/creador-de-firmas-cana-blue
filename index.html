@@ -26,8 +26,16 @@
 
 <main class="layout">
   <!-- ============ EDITOR ============ -->
+  <nav class="rail">
+    <button data-sec="sec-design" class="on"><iconify-icon icon="mdi:palette" width="22"></iconify-icon><span>Style</span></button>
+    <button data-sec="sec-agent"><iconify-icon icon="mdi:account" width="22"></iconify-icon><span>Agent</span></button>
+    <button data-sec="sec-links"><iconify-icon icon="mdi:link-variant" width="22"></iconify-icon><span>Links</span></button>
+    <button data-sec="sec-photo"><iconify-icon icon="mdi:image" width="22"></iconify-icon><span>Photo</span></button>
+    <button data-sec="sec-certs"><iconify-icon icon="mdi:medal" width="22"></iconify-icon><span>Certs</span></button>
+    <button data-sec="sec-display"><iconify-icon icon="mdi:eye" width="22"></iconify-icon><span>Display</span></button>
+  </nav>
   <aside class="editor">
-    <section class="card">
+    <section class="card show" id="sec-design">
       <h3><iconify-icon icon="mdi:palette"></iconify-icon> Template &amp; color</h3>
       <label class="lbl">Template</label>
       <div class="tpl-grid" id="tplGrid">
@@ -40,43 +48,37 @@
         <button data-tpl="photo-top" class="tpl"><span class="sk"><span class="col center"><span class="ph"><iconify-icon icon="mdi:account" width="16"></iconify-icon></span><i class="bar" style="width:48%;margin-top:4px"></i><i class="bar" style="width:34%"></i></span><span class="divv"></span><span class="sk-row"><span class="bars"><i class="bar"></i><i class="bar" style="width:80%"></i></span><span class="col" style="align-items:flex-end"><span class="logo"></span><span class="dots" style="margin-top:4px"><i></i><i></i></span></span></span><span class="divv"></span></span><span class="tname">Photo Top</span></button>
         <button data-tpl="photo-right" class="tpl"><span class="sk"><span class="sk-row"><span class="bars"><i class="bar" style="width:70%"></i><i class="bar" style="width:50%"></i><span class="divv"></span><i class="bar"></i><i class="bar" style="width:80%"></i></span><span class="col"><span class="ph"><iconify-icon icon="mdi:account" width="16"></iconify-icon></span><span class="logo" style="margin-top:5px"></span></span></span></span><span class="tname">Photo Right</span></button>
       </div>
-      <div class="row2">
-        <div>
-          <label class="lbl">Primary color</label>
-          <div class="color-row">
-            <input type="color" id="fColor" value="#174176">
-            <input type="text" id="fColorHex" value="#174176" maxlength="7">
-          </div>
-          <div class="swatches">
-            <button data-c="#174176" style="background:#174176" title="Cana Blue"></button>
-            <button data-c="#0A1F44" style="background:#0A1F44" title="Navy"></button>
-            <button data-c="#0E5A6D" style="background:#0E5A6D" title="Ocean"></button>
-            <button data-c="#8C6A2F" style="background:#8C6A2F" title="Sand / Luxury"></button>
-          </div>
-        </div>
-        <div>
-          <label class="lbl">Agent</label>
-          <div class="agent-select">
-            <input id="agentSearch" value="Pamela Núñez" placeholder="Search agent..." autocomplete="off">
-            <div id="agentList" class="agent-list hidden"></div>
-          </div>
-          <p class="hint">Search and pick an agent to autofill every field.</p>
-          <div class="row-btns">
-            <button id="btnSaveAgent" class="btn small primary">Save agent</button>
-            <button id="btnExportAgents" class="btn small">Export JSON</button>
-          </div>
-          <label class="lbl">Google Sheet ID (database)</label>
-          <div class="db-row">
-            <input id="fSheetId" placeholder="Paste spreadsheet ID..." autocomplete="off">
-            <button id="btnReloadDb" class="btn small">Reload</button>
-          </div>
-          <p class="hint"><span id="dbDot" class="db-dot"></span><span id="dbStatus">Local data</span></p>
-        </div>
+      <label class="lbl">Primary color</label>
+      <div class="color-row">
+        <input type="color" id="fColor" value="#174176">
+        <input type="text" id="fColorHex" value="#174176" maxlength="7">
+      </div>
+      <div class="swatches">
+        <button data-c="#174176" style="background:#174176" title="Cana Blue"></button>
+        <button data-c="#0A1F44" style="background:#0A1F44" title="Navy"></button>
+        <button data-c="#0E5A6D" style="background:#0E5A6D" title="Ocean"></button>
+        <button data-c="#8C6A2F" style="background:#8C6A2F" title="Sand / Luxury"></button>
       </div>
     </section>
 
-    <section class="card">
+    <section class="card" id="sec-agent">
       <h3><iconify-icon icon="mdi:account"></iconify-icon> Agent details</h3>
+      <label class="lbl">Agent</label>
+      <div class="agent-select">
+        <input id="agentSearch" value="Pamela Núñez" placeholder="Search agent..." autocomplete="off">
+        <div id="agentList" class="agent-list hidden"></div>
+      </div>
+      <p class="hint">Search and pick an agent to autofill every field.</p>
+      <div class="row-btns">
+        <button id="btnSaveAgent" class="btn small primary">Save agent</button>
+        <button id="btnExportAgents" class="btn small">Export JSON</button>
+      </div>
+      <label class="lbl">Google Sheet ID (database)</label>
+      <div class="db-row">
+        <input id="fSheetId" placeholder="Paste spreadsheet ID..." autocomplete="off">
+        <button id="btnReloadDb" class="btn small">Reload</button>
+      </div>
+      <p class="hint"><span id="dbDot" class="db-dot"></span><span id="dbStatus">Local data</span></p>
       <div class="grid2">
         <div><label class="lbl">Name</label><input id="fNombre" value="Pamela Núñez"></div>
         <div><label class="lbl">Title</label><input id="fCargo" value="Broker Owner"></div>
@@ -93,12 +95,12 @@
       </div>
       <label class="lbl">Address link (Google Maps — opens on click)</label>
       <input id="fDirUrl" value="https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111">
-    </section>
-
-    <section class="card">
-      <h3><iconify-icon icon="mdi:link-variant"></iconify-icon> Links</h3>
       <label class="lbl">My listings URL (View My Listings button)</label>
       <input id="fListings" value="https://canablue.com/author/pamepam/">
+    </section>
+
+    <section class="card" id="sec-links">
+      <h3><iconify-icon icon="mdi:link-variant"></iconify-icon> Links</h3>
       <label class="lbl">LinkedIn URL</label>
       <input id="fLinkedin" value="https://do.linkedin.com/in/pamela-nunez-0280814a">
       <div class="grid2">
@@ -119,7 +121,7 @@
       <button id="btnAddLink" class="btn small dashed">+ Add link</button>
     </section>
 
-    <section class="card">
+    <section class="card" id="sec-photo">
       <h3><iconify-icon icon="mdi:image"></iconify-icon> Photo &amp; logo</h3>
       <label class="lbl">Photo URL (circular)</label>
       <input id="fFoto" value="https://res.cloudinary.com/ybkuwivn/image/upload/v1792087360/Firmas_de_correo_Electronico_pamela.png">
@@ -129,7 +131,7 @@
       <p class="hint">Tip: upload the photo to Cloudinary / your website and paste the public https link so it loads in Gmail / Outlook.</p>
     </section>
 
-    <section class="card">
+    <section class="card" id="sec-certs">
       <h3><iconify-icon icon="mdi:medal"></iconify-icon> Certifications</h3>
       <div class="checks">
         <label><input type="checkbox" id="cCRS" checked> CRS</label>
@@ -160,7 +162,7 @@
       <button id="btnAddCert" class="btn small dashed">+ Add certification</button>
     </section>
 
-    <section class="card">
+    <section class="card" id="sec-display">
       <h3><iconify-icon icon="mdi:eye"></iconify-icon> Visibility</h3>
       <div class="checks col">
         <label><input type="checkbox" id="vFoto" checked> Show photo</label>
