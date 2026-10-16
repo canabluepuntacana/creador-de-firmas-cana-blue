@@ -19,7 +19,7 @@ const state = {
   certsAlign: 'center',
   extra: [],
   iconStyle: 'solid',
-  vis: { foto: true, zona: true, social: true, certs: true, legal: true },
+  vis: { foto: true, zona: true, social: true, certs: true, legal: true, listings: true },
   legal: 'The information in this email is confidential and intended solely for its recipient.'
 };
 const BRAND = { instagram: '#000000', whatsapp: '#25D366', linkedin: '#0A66C2' };
@@ -144,18 +144,20 @@ async function buildHTML() {
   // Social circles only: Instagram (outline glyph) / WhatsApp (flat) / LinkedIn.
   const ist = s.iconStyle || 'solid';
   const cal = ['left', 'center', 'right'].includes(s.certsAlign) ? s.certsAlign : 'center';
-  let socials = !s.vis.social ? '' :
-    socialIcon(s.instagram, 'instagram', ist, c) + '&nbsp;' +
-    socialIcon(s.whatsapp, 'whatsapp', ist, c) + '&nbsp;' +
-    socialIcon(s.linkedin, 'linkedin', ist, c);
-  if (s.vis.social && s.extra.length) {
-    const xc = s.extra.filter(e => e.url).map(e => extraBtn(e, c, ist)).join('&nbsp;');
-    if (xc) socials += '&nbsp;' + xc;
+  // Only networks that actually have a URL are rendered — an empty link must not
+  // leave a dangling icon in the signature.
+  let socialParts = [
+    ['instagram', s.instagram], ['whatsapp', s.whatsapp], ['linkedin', s.linkedin]
+  ].filter(([, u]) => String(u || '').trim())
+    .map(([k, u]) => socialIcon(String(u).trim(), k, ist, c));
+  if (s.extra.length) {
+    socialParts = socialParts.concat(s.extra.filter(e => String(e.url || '').trim()).map(e => extraBtn(e, c, ist)));
   }
+  const socials = (!s.vis.social || !socialParts.length) ? '' : socialParts.join('&nbsp;');
 
   const legal = s.vis.legal
     ? `<tr><td style="padding-top:12px;font-size:10px;line-height:14px;color:#8a94a8;text-align:center;font-family:Arial,Helvetica,sans-serif;max-width:560px;">${s.legal}</td></tr>` : '';
-  const viewBtn = viewPropsBtn(s.listings, c);
+  const viewBtn = s.vis.listings ? viewPropsBtn(s.listings, c) : '';
 
   const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign);
   const zona = (s.vis.zona && s.zona) ? zonaText(s.zona) : '';
@@ -286,7 +288,7 @@ function syncStateFromInputs() {
   state.certs = { crs: $('cCRS').checked, aei: $('cAEI').checked, realtor: $('cRealtor').checked, sr23: $('cSR23').checked, sr24: $('cSR24').checked, lux: $('cLux').checked };
   state.certLinks = { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value };
   state.customCerts = [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link);
-  state.vis = { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, certs: $('vCerts').checked, legal: $('vLegal').checked };
+  state.vis = { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, listings: $('vListings').checked, certs: $('vCerts').checked, legal: $('vLegal').checked };
   state.legal = $('fLegal').value;
   document.querySelectorAll('#tplGrid .tpl').forEach(b => b.classList.toggle('active', b.dataset.tpl === state.tpl));
 }
@@ -577,7 +579,7 @@ document.querySelectorAll('.rail button').forEach(b => b.onclick = () => {
 });
 document.querySelectorAll('#tplGrid .tpl').forEach(b => b.onclick = () => { state.tpl = b.dataset.tpl; render(); });
 document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; render(); });
-['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', render));
+['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', render));
 $('fColorHex').addEventListener('change', e => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('fColor').value = e.target.value; render(); });
 $('fFotoFile').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
