@@ -122,11 +122,18 @@ textarea{resize:vertical}
 .seg .demo img{width:13px;height:13px;display:block}
 .xlink button{border:1px solid var(--line);background:#fff;border-radius:8px;cursor:pointer}
 .preview-col{min-width:0}
-.preview-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px}
+.preview-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px}
 .preview-box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px;overflow:auto}
 #sigPreview{display:flex;justify-content:center}
 .switch{font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer}
 .switch input{width:auto}
+.tool-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{font-size:11.5px;font-weight:600;color:#42506a;background:#f1f5fa;border:1px solid var(--line);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.chip.warn{color:#8a5a00;background:#fff6e5;border-color:#f0d9a8}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.copied{background:#0f7b3f;border-color:#0f7b3f;color:#fff}
+.agent-item.hi{background:#eef3fb}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 pre{background:#0d1b33;color:#cfe0ff;border-radius:12px;padding:14px;overflow:auto;max-height:320px;font-size:11.5px}
 .hidden{display:none}
 .steps{display:flex;flex-direction:column;gap:4px;margin-top:12px;font-size:13px;color:#42506a;background:#fff;border:1px dashed var(--line);border-radius:12px;padding:12px 14px}

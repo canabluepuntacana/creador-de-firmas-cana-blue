@@ -8,6 +8,7 @@ const state = {
   dir: 'Local P104, Plaza San Juan Shopping Center, Bávaro, Punta Cana',
   dirUrl: 'https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111',
   listings: 'https://canablue.com/author/pamepam/',
+  booking: '',
   linkedin: 'https://do.linkedin.com/in/pamela-nunez-0280814a',
   instagram: 'https://www.instagram.com/pamela_canablue.rd',
   whatsapp: 'https://wa.me/18096080943',
@@ -19,25 +20,39 @@ const state = {
   certsAlign: 'center',
   extra: [],
   iconStyle: 'solid',
-  vis: { foto: true, zona: true, social: true, certs: true, legal: true, listings: true },
+  vis: { foto: true, zona: true, social: true, listings: true, booking: true, qr: false, certs: true, legal: true },
   legal: 'The information in this email is confidential and intended solely for its recipient.'
 };
 const BRAND = { instagram: '#000000', whatsapp: '#25D366', linkedin: '#0A66C2' };
+// Single base for the signature icon PNGs. Point this at your own host (e.g. your
+// Cloudinary folder) to stop depending on the icons8 CDN — see README.
+const ICON_BASE = 'https://img.icons8.com';
+const IMG = (set, size, color, name) => `${ICON_BASE}/${set}/${size}/${color}/${name}.png`;
 // Logo picker for extra links: official-style white glyph on brand color (email-safe PNG)
 const NETWORKS = {
-  facebook: { label: 'Facebook', bg: '#1877F2', slug: 'facebook-f', img: 'https://img.icons8.com/material-outlined/48/ffffff/facebook-f.png' },
-  instagram: { label: 'Instagram', bg: '#000000', slug: 'instagram', img: 'https://img.icons8.com/material-outlined/48/ffffff/instagram.png' },
-  whatsapp: { label: 'WhatsApp', bg: '#25D366', slug: 'whatsapp', img: 'https://img.icons8.com/material-outlined/48/ffffff/whatsapp.png' },
-  linkedin: { label: 'LinkedIn', bg: '#0A66C2', slug: 'linkedin', img: 'https://img.icons8.com/material-outlined/48/ffffff/linkedin.png' },
-  x: { label: 'X (Twitter)', bg: '#000000', slug: 'twitterx', img: 'https://img.icons8.com/material-outlined/48/ffffff/twitterx.png' },
-  tiktok: { label: 'TikTok', bg: '#000000', slug: 'tiktok', img: 'https://img.icons8.com/material-outlined/48/ffffff/tiktok.png' },
-  youtube: { label: 'YouTube', bg: '#FF0000', slug: 'youtube-play', img: 'https://img.icons8.com/material-outlined/48/ffffff/youtube-play.png' },
-  telegram: { label: 'Telegram', bg: '#229ED9', slug: 'telegram-app', img: 'https://img.icons8.com/material-outlined/48/ffffff/telegram-app.png' },
-  pinterest: { label: 'Pinterest', bg: '#E60023', slug: 'pinterest', img: 'https://img.icons8.com/material-outlined/48/ffffff/pinterest.png' },
-  website: { label: 'Website / custom link', bg: '#174176', slug: 'link', img: 'https://img.icons8.com/material-outlined/48/ffffff/link.png' }
+  facebook: { label: 'Facebook', bg: '#1877F2', slug: 'facebook-f', img: IMG('material-outlined', 48, 'ffffff', 'facebook-f') },
+  instagram: { label: 'Instagram', bg: '#000000', slug: 'instagram', img: IMG('material-outlined', 48, 'ffffff', 'instagram') },
+  whatsapp: { label: 'WhatsApp', bg: '#25D366', slug: 'whatsapp', img: IMG('material-outlined', 48, 'ffffff', 'whatsapp') },
+  linkedin: { label: 'LinkedIn', bg: '#0A66C2', slug: 'linkedin', img: IMG('material-outlined', 48, 'ffffff', 'linkedin') },
+  x: { label: 'X (Twitter)', bg: '#000000', slug: 'twitterx', img: IMG('material-outlined', 48, 'ffffff', 'twitterx') },
+  tiktok: { label: 'TikTok', bg: '#000000', slug: 'tiktok', img: IMG('material-outlined', 48, 'ffffff', 'tiktok') },
+  youtube: { label: 'YouTube', bg: '#FF0000', slug: 'youtube-play', img: IMG('material-outlined', 48, 'ffffff', 'youtube-play') },
+  telegram: { label: 'Telegram', bg: '#229ED9', slug: 'telegram-app', img: IMG('material-outlined', 48, 'ffffff', 'telegram-app') },
+  pinterest: { label: 'Pinterest', bg: '#E60023', slug: 'pinterest', img: IMG('material-outlined', 48, 'ffffff', 'pinterest') },
+  website: { label: 'Website / custom link', bg: '#174176', slug: 'link', img: IMG('material-outlined', 48, 'ffffff', 'link') }
 };
 function networkGlyph(n, hex) {
-  return `https://img.icons8.com/material-outlined/48/${hex}/${n.slug}.png`;
+  return IMG('material-outlined', 48, hex, n.slug);
+}
+// Text coming from the editor goes into HTML: escape it so "&", "<" or a stray
+// quote can never break (or corrupt) the generated signature.
+const esc = v => String(v == null ? '' : v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// Tolerate bare domains ("canablue.com") typed into URL fields.
+function normUrl(u) {
+  const t = String(u == null ? '' : u).trim();
+  if (!t) return '';
+  if (/^(https?:|mailto:|tel:|data:|#)/i.test(t)) return t;
+  return 'https://' + t.replace(/^\/+/, '');
 }
 // Extra-link button in 3 shapes: circle (solid) / square (solid) / outline (line only, no fill)
 // Global social icon style (solid / rounded / outline / frame / line / soft),
@@ -85,11 +100,77 @@ const hexA = (hex, a) => {
 };
 // Modern outline (line) icons, matching the Pamela reference. PNG = email-safe
 // (email clients block SVG/Iconify, so brand/official logos ship as PNG images).
-const lineIcon = (name, colorHex) => `https://img.icons8.com/ios/50/${colorHex.replace('#', '')}/${name}.png`;
-const whiteGlyph = name => `https://img.icons8.com/ios-filled/50/ffffff/${name}.png`;
+const lineIcon = (name, colorHex) => IMG('ios', 50, colorHex.replace('#', ''), name);
+const whiteGlyph = name => IMG('ios-filled', 50, 'ffffff', name);
 
-function contactRow(iconUrl, contentHtml) {
-  return `<tr><td width="22" style="vertical-align:middle;padding:3px 0;"><img src="${iconUrl}" width="15" height="15" style="display:block;width:15px;height:15px;" alt=""></td><td style="vertical-align:middle;font-size:12px;line-height:17px;color:#222222;font-family:Arial,Helvetica,sans-serif;">${contentHtml}</td></tr>`;
+// ---- vCard + QR ------------------------------------------------------------
+// The QR encodes a vCard so a scan saves the agent to the phone's contacts. It is
+// embedded as a data URI, so it renders without any extra image host.
+function vcardText(s) {
+  const tel = String(s.tel || '').replace(/[^+\d]/g, '');
+  return [
+    'BEGIN:VCARD', 'VERSION:3.0',
+    `N:${s.nombre};;;;`, `FN:${s.nombre}`,
+    s.cargo ? `TITLE:${s.cargo}` : '', 'ORG:Canablue Real Estate',
+    tel ? `TEL;TYPE=CELL:${tel}` : '',
+    s.email ? `EMAIL;TYPE=WORK:${s.email}` : '',
+    s.web ? `URL:${normUrl(s.web)}` : '',
+    s.dir ? `ADR;TYPE=WORK:;;${s.dir};;;;` : '',
+    'END:VCARD'
+  ].filter(Boolean).join('\r\n');
+}
+// UTF-8 encode into a binary string (one char = one byte). The QR library reads
+// charCodeAt, so this keeps accented names like "Núñez" correct in the vCard.
+function utf8Bytes(str) {
+  let out = '';
+  for (const ch of String(str)) {
+    const c = ch.codePointAt(0);
+    if (c < 0x80) out += String.fromCharCode(c);
+    else if (c < 0x800) out += String.fromCharCode(0xc0 | (c >> 6), 0x80 | (c & 63));
+    else if (c < 0x10000) out += String.fromCharCode(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+    else out += String.fromCharCode(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+  }
+  return out;
+}
+const qrCache = {};
+function qrDataURL(text, size) {
+  const key = size + '|' + text;
+  if (qrCache[key]) return qrCache[key];
+  try {
+    if (typeof qrcode !== 'function') return '';
+    const qr = qrcode(0, 'M'); // 0 = pick the version automatically, M = error correction
+    qr.addData(utf8Bytes(text), 'Byte');
+    qr.make();
+    const count = qr.getModuleCount();
+    const quiet = 2;
+    const cell = Math.max(2, Math.floor(size / (count + quiet * 2)));
+    const px = cell * (count + quiet * 2);
+    const cv = document.createElement('canvas');
+    cv.width = px; cv.height = px;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, px, px);
+    ctx.fillStyle = '#0b1220';
+    for (let r = 0; r < count; r++) {
+      for (let c = 0; c < count; c++) {
+        if (qr.isDark(r, c)) ctx.fillRect((c + quiet) * cell, (r + quiet) * cell, cell, cell);
+      }
+    }
+    const d = cv.toDataURL('image/png');
+    if (d) qrCache[key] = d;
+    return d;
+  } catch { return ''; }
+}
+function qrRow(data, align) {
+  const src = qrDataURL(data, 280);
+  if (!src) return '';
+  return `<tr><td align="${align || 'center'}" style="padding-top:12px;"><table cellpadding="0" cellspacing="0" border="0" style="display:inline-block;"><tbody><tr>
+<td valign="middle" style="padding-right:10px;"><img src="${src}" width="92" height="92" alt="Scan to save my contact" style="display:block;width:92px;height:92px;border:0;"></td>
+<td valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:15px;color:#5b6b84;text-align:left;">Scan to save<br>my contact</td>
+</tr></tbody></table></td></tr>`;
+}
+
+function contactRow(iconUrl, contentHtml, alt) {
+  return `<tr><td width="22" style="vertical-align:middle;padding:3px 0;"><img src="${iconUrl}" width="15" height="15" style="display:block;width:15px;height:15px;" alt="${alt || ''}"></td><td style="vertical-align:middle;font-size:12px;line-height:17px;color:#222222;font-family:Arial,Helvetica,sans-serif;">${contentHtml}</td></tr>`;
 }
 function socialBtn(href, bg, iconUrl, alt) {
   return `<a href="${href}" target="_blank" style="display:inline-block;width:28px;height:28px;border-radius:50%;background-color:${bg};text-align:center;vertical-align:middle;"><img src="${iconUrl}" width="15" height="15" alt="${alt}" style="display:inline-block;width:15px;height:15px;margin-top:6px;border:0;"></a>`;
@@ -98,6 +179,11 @@ function socialBtn(href, bg, iconUrl, alt) {
 function viewPropsBtn(listings, c) {
   if (!listings) return '';
   return `<a href="${listings}" target="_blank" style="display:inline-block;background-color:${c};color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;text-decoration:none;border-radius:20px;padding:8px 16px;white-space:nowrap;"><img src="${whiteGlyph('home')}" width="14" height="14" alt="" style="display:inline-block;width:14px;height:14px;vertical-align:-2px;border:0;">&nbsp;View My Listings</a>`;
+}
+// Optional second pill: booking / agenda link (Calendly, etc.)
+function scheduleBtn(url, c) {
+  if (!url) return '';
+  return `<a href="${url}" target="_blank" style="display:inline-block;background-color:${c};color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;text-decoration:none;border-radius:20px;padding:8px 16px;white-space:nowrap;"><img src="${whiteGlyph('calendar')}" width="14" height="14" alt="" style="display:inline-block;width:14px;height:14px;vertical-align:-2px;border:0;">&nbsp;Schedule a Call</a>`;
 }
 // Plain clean text, no pill background or border
 function zonaText(zona) {
@@ -127,19 +213,33 @@ function certsRow(certs, links, customs, vis, align) {
 /* Extra links render as social circles appended to `socials` (see above). */
 
 async function buildHTML() {
-  const s = state, c = cleanHex(s.color);
+  const raw = state, c = cleanHex(raw.color);
+  // Shallow copy used by every template below: plain-text fields are HTML-escaped
+  // and URL fields normalized, so the interpolation further down is always safe.
+  const s = {
+    ...raw,
+    nombre: esc(raw.nombre), cargo: esc(raw.cargo), zona: esc(raw.zona),
+    tel: esc(raw.tel), email: esc(raw.email), web: esc(raw.web),
+    dir: esc(raw.dir), legal: esc(raw.legal),
+    dirUrl: normUrl(raw.dirUrl), listings: normUrl(raw.listings), booking: normUrl(raw.booking),
+    instagram: normUrl(raw.instagram), whatsapp: normUrl(raw.whatsapp), linkedin: normUrl(raw.linkedin),
+    foto: normUrl(raw.foto), logo: normUrl(raw.logo),
+    extra: (raw.extra || []).map(e => ({ ...e, url: normUrl(e.url) })),
+    certLinks: Object.fromEntries(Object.entries(raw.certLinks || {}).map(([k, v]) => [k, normUrl(v)])),
+    customCerts: (raw.customCerts || []).map(x => ({ img: normUrl(x.img), link: normUrl(x.link) }))
+  };
   const logoUrl = await toDataURL(s.logo);
-  const telHref = 'tel:' + s.tel.replace(/[^+\d]/g, '');
-  const webHref = s.web.startsWith('http') ? s.web : 'https://' + s.web;
+  const telHref = 'tel:' + String(raw.tel || '').replace(/[^+\d]/g, '');
+  const webHref = normUrl(raw.web) || '#';
   const fotoCell = (size) => s.vis.foto
     ? `<div style="text-align:center;"><img src="${s.foto}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;display:inline-block;border:3px solid ${c}22;" alt="${s.nombre}"></div>` : '';
 
   // Contact rows: phone / email / web / address only (no listings row, no LinkedIn text row)
   const rows =
-    contactRow(lineIcon('phone', c), `<a href="${telHref}" style="color:#222;text-decoration:none;">${s.tel}</a>`) +
-    contactRow(lineIcon('new-post', c), `<a href="mailto:${s.email}" style="color:#222;text-decoration:none;">${s.email}</a>`) +
-    contactRow(lineIcon('domain', c), `<a href="${webHref}" style="color:#222;text-decoration:none;">${s.web}</a>`) +
-    contactRow(lineIcon('marker', c), s.dirUrl ? `<a href="${s.dirUrl}" target="_blank" style="color:#222;text-decoration:none;">${s.dir}</a>` : `<span>${s.dir}</span>`);
+    contactRow(lineIcon('phone', c), `<a href="${telHref}" style="color:#222;text-decoration:none;">${s.tel}</a>`, 'Phone') +
+    contactRow(lineIcon('new-post', c), `<a href="mailto:${s.email}" style="color:#222;text-decoration:none;">${s.email}</a>`, 'Email') +
+    contactRow(lineIcon('domain', c), `<a href="${webHref}" style="color:#222;text-decoration:none;">${s.web}</a>`, 'Website') +
+    contactRow(lineIcon('marker', c), s.dirUrl ? `<a href="${s.dirUrl}" target="_blank" style="color:#222;text-decoration:none;">${s.dir}</a>` : `<span>${s.dir}</span>`, 'Address');
 
   // Social circles only: Instagram (outline glyph) / WhatsApp (flat) / LinkedIn.
   const ist = s.iconStyle || 'solid';
@@ -157,9 +257,14 @@ async function buildHTML() {
 
   const legal = s.vis.legal
     ? `<tr><td style="padding-top:12px;font-size:10px;line-height:14px;color:#8a94a8;text-align:center;font-family:Arial,Helvetica,sans-serif;max-width:560px;">${s.legal}</td></tr>` : '';
-  const viewBtn = s.vis.listings ? viewPropsBtn(s.listings, c) : '';
+  // Both pills are optional and disappear when the toggle is off or the URL is empty.
+  const pills = [];
+  if (s.vis.listings && s.listings) pills.push(viewPropsBtn(s.listings, c));
+  if (s.vis.booking && s.booking) pills.push(scheduleBtn(s.booking, c));
+  const viewBtn = pills.join('&nbsp;');
 
   const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign);
+  const qr = (s.vis.qr && raw) ? qrRow(vcardText(raw), cal) : '';
   const zona = (s.vis.zona && s.zona) ? zonaText(s.zona) : '';
 
   if (s.tpl === 'broker') {
@@ -172,7 +277,7 @@ async function buildHTML() {
 <tr><td colspan="4"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:14px;border-top:1px solid ${c};"><tbody><tr>
 <td valign="middle" align="${cal}" style="padding-top:12px;">${s.vis.certs ? certImgs(s.certs, s.certLinks, s.customCerts, 28).join('&nbsp;') : ''}</td>
 <td align="right" valign="middle" style="padding-top:12px;"><img src="${logoUrl}" width="130" style="width:130px;max-width:130px;display:inline-block;" alt="Canablue"><div style="padding-top:8px;">${viewBtn}</div><div style="padding-top:8px;">${socials}</div></td>
-</tr></tbody></table></td></tr>${legal}</tbody></table>`;
+</tr></tbody></table></td></tr>${qr}${legal}</tbody></table>`;
   }
   if (s.tpl === 'moderna') {
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
@@ -183,7 +288,7 @@ async function buildHTML() {
 <tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:16px 22px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
 <td valign="top" width="55%"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
 <td valign="top" align="right"><img src="${logoUrl}" width="125" style="width:125px;display:inline-block;" alt="Canablue"><div style="margin-top:10px;">${viewBtn}</div><div style="margin-top:10px;">${socials}</div></td>
-</tr></tbody></table>${certs}${legal}</td></tr></tbody></table>`;
+</tr></tbody></table>${certs}${qr}${legal}</td></tr></tbody></table>`;
   }
   if (s.tpl === 'banner') {
     const sqPhoto = s.vis.foto ? `<img src="${s.foto}" width="84" height="84" style="width:84px;height:84px;border-radius:50%;object-fit:cover;display:block;border:3px solid #ffffff;" alt="${s.nombre}">` : '';
@@ -196,7 +301,7 @@ async function buildHTML() {
 <td valign="top" width="56%"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
 <td valign="middle" align="center"><div>${viewBtn}</div><div style="margin-top:12px;">${socials}</div><div style="margin-top:12px;"><img src="${logoUrl}" width="115" style="width:115px;display:inline-block;" alt="Canablue"></div></td>
 </tr></tbody></table></td></tr>
-<tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:0 22px 18px;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td></tr>
+<tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:0 22px 18px;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td></tr>
 </tbody></table>`;
   }
   if (s.tpl === 'sidebar') {
@@ -211,7 +316,7 @@ async function buildHTML() {
 <table cellpadding="0" cellspacing="0" border="0">${rows}</table>
 <div style="margin-top:12px;">${viewBtn}</div>
 <div style="margin-top:14px;"><img src="${logoUrl}" width="120" style="width:120px;display:inline-block;" alt="Canablue"></div>
-<table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td>
+<table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td>
 </tr></tbody></table>`;
   }
   if (s.tpl === 'photo-left') {
@@ -225,7 +330,7 @@ async function buildHTML() {
 <table cellpadding="0" cellspacing="0" border="0">${rows}</table>
 <div style="margin-top:10px;">${viewBtn}</div></td>
 </tr>
-<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td></tr>
+<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td></tr>
 </tbody></table>`;
   }
   if (s.tpl === 'photo-top') {
@@ -237,7 +342,7 @@ async function buildHTML() {
 <td valign="top"><table cellpadding="0" cellspacing="0" border="0">${rows}</table><div style="margin-top:10px;">${viewBtn}</div></td>
 <td valign="top" align="right"><img src="${logoUrl}" width="130" style="width:130px;display:inline-block;" alt="Canablue"><div style="margin-top:10px;">${socials}</div></td>
 </tr></tbody></table></td></tr>
-<tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td></tr>
+<tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td></tr>
 <tr><td style="padding-top:12px;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div></td></tr>
 </tbody></table>`;
   }
@@ -252,7 +357,7 @@ async function buildHTML() {
 <div style="margin-top:12px;"><img src="${logoUrl}" width="120" style="width:120px;display:inline-block;" alt="Canablue"></div>
 <div style="margin-top:10px;">${socials}</div></td>
 </tr>
-<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${legal}</table></td></tr>
+<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td></tr>
 </tbody></table>`;
   }
   // Main template
@@ -267,7 +372,7 @@ async function buildHTML() {
 <tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
 <td valign="middle"><table cellpadding="0" cellspacing="0" border="0"><tbody><tr><td valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td><td width="14"></td><td valign="middle">${viewBtn}</td></tr></tbody></table></td>
 <td align="right" valign="middle">${socials}</td></tr></tbody></table></td></tr>
-${certs}${legal}</tbody></table>`;
+${certs}${qr}${legal}</tbody></table>`;
 }
 
 async function render() {
@@ -275,24 +380,45 @@ async function render() {
   const html = await buildHTML();
   $('sigPreview').innerHTML = html;
   $('codeText').textContent = html;
+  updateStats(html);
   autosave();
   return html;
 }
+// Live weight of the copied HTML: Gmail clips signatures over ~102 KB.
+function updateStats(html) {
+  const chip = $('sizeChip');
+  if (!chip) return;
+  const kb = new Blob([html]).size / 1024;
+  chip.textContent = kb.toFixed(1) + ' KB';
+  chip.classList.toggle('warn', kb >= 100);
+}
+function setDirty(on) { const d = $('dirtyChip'); if (d) d.hidden = !on; }
+function markDirty() { setDirty(true); render(); }
 function syncStateFromInputs() {
   state.color = $('fColor').value || '#174176'; $('fColorHex').value = state.color.toUpperCase();
   state.nombre = $('fNombre').value; state.cargo = $('fCargo').value; state.zona = $('fZona').value;
   state.tel = $('fTel').value; state.email = $('fEmail').value; state.web = $('fWeb').value; state.dir = $('fDir').value; state.dirUrl = $('fDirUrl').value;
   state.listings = $('fListings').value; state.linkedin = $('fLinkedin').value;
+  state.booking = $('fBooking').value;
   state.instagram = $('fInstagram').value; state.whatsapp = $('fWhatsapp').value;
   state.foto = $('fFoto').value; state.logo = $('fLogo').value;
   state.certs = { crs: $('cCRS').checked, aei: $('cAEI').checked, realtor: $('cRealtor').checked, sr23: $('cSR23').checked, sr24: $('cSR24').checked, lux: $('cLux').checked };
   state.certLinks = { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value };
   state.customCerts = [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link);
-  state.vis = { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, listings: $('vListings').checked, certs: $('vCerts').checked, legal: $('vLegal').checked };
+  state.vis = { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, listings: $('vListings').checked, booking: $('vBooking').checked, qr: $('vQr').checked, certs: $('vCerts').checked, legal: $('vLegal').checked };
   state.legal = $('fLegal').value;
   document.querySelectorAll('#tplGrid .tpl').forEach(b => b.classList.toggle('active', b.dataset.tpl === state.tpl));
 }
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600); }
+// Visual confirmation on the copy buttons themselves (not only the toast).
+function flashCopied(btn) {
+  if (!btn) return;
+  const original = btn.innerHTML;
+  btn.classList.add('copied');
+  btn.innerHTML = '<iconify-icon icon="mdi:check"></iconify-icon> Copied';
+  clearTimeout(btn._t);
+  btn._t = setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 2000);
+}
 
 async function copyRich() {
   const html = await render();
@@ -300,6 +426,7 @@ async function copyRich() {
   try {
     const item = new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) });
     await navigator.clipboard.write([item]);
+    flashCopied($('btnCopyRich'));
     toast('Signature copied. Paste it with Ctrl+V into your email.');
   } catch {
     const w = window.open('', '_blank', 'width=700,height=500'); w.document.write(html); w.document.close(); w.focus();
@@ -307,7 +434,15 @@ async function copyRich() {
     toast('Manual copy: press Ctrl+C in the opened window.');
   }
 }
-async function copyHtml() { const html = await render(); await navigator.clipboard.writeText(html); toast('HTML code copied.'); }
+async function copyHtml() { const html = await render(); await navigator.clipboard.writeText(html); flashCopied($('btnCopyHtml')); toast('HTML code copied.'); }
+// Standalone vCard, handy for a phone or for sharing the contact directly.
+function downloadVcf() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([vcardText(state)], { type: 'text/vcard' }));
+  a.download = slug(state.nombre) + '.vcf';
+  a.click();
+  toast('Contact file downloaded — open it to save the agent to your phone.');
+}
 async function download() {
   const html = await render();
   const full = `<!DOCTYPE html><html><body>${html}</body></html>`;
@@ -344,20 +479,23 @@ function iconPicker(selected, onPick) {
     wrap.querySelectorAll('.ipick-item').forEach(it => it.classList.toggle('sel', it.dataset.k === k));
   };
   const n0 = NETWORKS[selected] || NETWORKS.facebook;
-  wrap.innerHTML = `<button type="button" class="ipick-btn"><span class="ipick-logo" style="background:${n0.bg}"><img src="${n0.img}" alt=""></span><span>${n0.label}</span></button><div class="ipick-menu hidden">${Object.keys(NETWORKS).map(k => {
+  wrap.innerHTML = `<button type="button" class="ipick-btn" aria-haspopup="listbox" aria-expanded="false"><span class="ipick-logo" style="background:${n0.bg}"><img src="${n0.img}" alt=""></span><span>${n0.label}</span></button><div class="ipick-menu hidden" role="listbox" tabindex="-1">${Object.keys(NETWORKS).map(k => {
     const n = NETWORKS[k];
-    return `<div class="ipick-item${k === selected ? ' sel' : ''}" data-k="${k}"><span class="ipick-logo" style="background:${n.bg}"><img src="${n.img}" alt=""></span><span>${n.label}</span></div>`;
+    return `<div class="ipick-item${k === selected ? ' sel' : ''}" role="option" aria-selected="${k === selected}" data-k="${k}"><span class="ipick-logo" style="background:${n.bg}"><img src="${n.img}" alt=""></span><span>${n.label}</span></div>`;
   }).join('')}</div>`;
   const menu = wrap.querySelector('.ipick-menu');
-  wrap.querySelector('.ipick-btn').onclick = e => {
+  const btn = wrap.querySelector('.ipick-btn');
+  const setOpen = open => { menu.classList.toggle('hidden', !open); btn.setAttribute('aria-expanded', String(open)); };
+  btn.onclick = e => {
     e.stopPropagation();
     document.querySelectorAll('.ipick-menu').forEach(m => { if (m !== menu) m.classList.add('hidden'); });
     const opening = menu.classList.contains('hidden');
-    menu.classList.toggle('hidden');
-    if (opening) placeFixed(menu, wrap.querySelector('.ipick-btn'), 200);
+    setOpen(opening);
+    if (opening) placeFixed(menu, btn, 200);
   };
+  menu.addEventListener('keydown', e => { if (e.key === 'Escape') { setOpen(false); btn.focus(); } });
   menu.querySelectorAll('.ipick-item').forEach(it => it.onclick = e => {
-    e.stopPropagation(); paint(it.dataset.k); menu.classList.add('hidden'); onPick(it.dataset.k);
+    e.stopPropagation(); paint(it.dataset.k); setOpen(false); onPick(it.dataset.k);
   });
   if (!ipickBound) { ipickBound = true; document.addEventListener('click', hideFloatMenus); document.addEventListener('scroll', onFloatScroll, true); window.addEventListener('resize', hideFloatMenus); }
   return wrap;
@@ -375,7 +513,7 @@ function addLinkRow(icon = 'facebook', url = '') {
   d._icon = NETWORKS[icon] ? icon : 'facebook';
   const urlInput = document.createElement('input'); urlInput.placeholder = 'https://…'; urlInput.value = url || '';
   const del = document.createElement('button'); del.textContent = '✕'; del.title = 'Remove';
-  const sync = () => { state.extra = [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value })).filter(e => e.url); render(); };
+  const sync = () => { state.extra = [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value })).filter(e => e.url); markDirty(); };
   d.appendChild(iconPicker(d._icon, k => { d._icon = k; sync(); }));
   d.appendChild(urlInput); d.appendChild(del);
   urlInput.oninput = sync; del.onclick = () => { d.remove(); sync(); };
@@ -384,7 +522,7 @@ function addLinkRow(icon = 'facebook', url = '') {
 function addCertRow(img = '', link = '') {
   const d = document.createElement('div'); d.className = 'xlink';
   d.innerHTML = `<input placeholder="Logo image URL (PNG)" value="${img || ''}"><input placeholder="Click-through link (optional)" value="${link || ''}"><button>✕</button>`;
-  const sync = () => { state.customCerts = [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link); render(); };
+  const sync = () => { state.customCerts = [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link); markDirty(); };
   d.querySelectorAll('input').forEach(i => i.oninput = sync); d.querySelector('button').onclick = () => { d.remove(); sync(); };
   $('customCerts').appendChild(d);
 }
@@ -399,7 +537,7 @@ let AGENTS = BUILTIN_AGENTS.slice();
 let JSON_AGENTS = [];
 // ---- Static-page persistence: data/agents.json (shared source of truth, via fetch)
 // + localStorage (per-browser autosave + custom agents). ----
-const LS_FORM = 'canablue.form.v2', LS_CUSTOM = 'canablue.agents.custom.v1';
+const LS_FORM = 'canablue.form.v3', LS_CUSTOM = 'canablue.agents.custom.v1';
 const getCustoms = () => { try { return JSON.parse(localStorage.getItem(LS_CUSTOM) || '[]'); } catch { return []; } };
 const setCustoms = c => localStorage.setItem(LS_CUSTOM, JSON.stringify(c));
 const isCustom = key => getCustoms().some(x => x.key === key);
@@ -427,8 +565,11 @@ async function loadSheetAgents(id) {
       tel: o.tel || '', email: o.email || '', web: o.web || 'canablue.com',
       dir: o.dir || DIR_DEFAULT, dirUrl: o.dirUrl || MAPS_DEFAULT,
       listings: o.listings || '', linkedin: o.linkedin || '',
+      booking: o.booking || '',
       instagram: o.instagram || '', whatsapp: o.whatsapp || '',
       foto: o.foto || '', logo: o.logo || '',
+      vis: o.qr == null ? undefined : { qr: B(o.qr) },
+      tpl: ['principal', 'broker', 'moderna', 'banner', 'sidebar', 'photo-left', 'photo-top', 'photo-right'].includes(String(o.tpl || '').toLowerCase()) ? String(o.tpl).toLowerCase() : undefined,
       certs: { crs: B(o.crs), aei: B(o.aei), realtor: B(o.realtor), sr23: B(o.sr23), sr24: B(o.sr24), lux: o.lux == null ? false : B(o.lux) },
       iconStyle: ['solid', 'rounded', 'outline', 'frame', 'line', 'soft'].includes(String(o.iconstyle || '').toLowerCase()) ? String(o.iconstyle).toLowerCase() : 'solid',
       certsAlign: ['left', 'center', 'right'].includes(String(o.certsalign || '').toLowerCase()) ? String(o.certsalign).toLowerCase() : 'center'
@@ -471,9 +612,12 @@ function collectAgent(key) {
     key, color: $('fColor').value, name: $('fNombre').value, role: $('fCargo').value,
     zona: $('fZona').value, tel: $('fTel').value, email: $('fEmail').value, web: $('fWeb').value,
     dir: $('fDir').value, dirUrl: $('fDirUrl').value, listings: $('fListings').value,
+    booking: $('fBooking').value,
     linkedin: $('fLinkedin').value, instagram: $('fInstagram').value, whatsapp: $('fWhatsapp').value,
     foto: $('fFoto').value, logo: $('fLogo').value,
     extra: [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value })).filter(e => e.url),
+    tpl: state.tpl,
+    vis: { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, listings: $('vListings').checked, booking: $('vBooking').checked, qr: $('vQr').checked, certs: $('vCerts').checked, legal: $('vLegal').checked },
     iconStyle: state.iconStyle,
     certsAlign: state.certsAlign,
     certLinks: { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value },
@@ -488,6 +632,7 @@ function applyAgent(a) {
   $('fEmail').value = a.email || ''; $('fWeb').value = a.web || 'canablue.com';
   $('fDir').value = a.dir || DIR_DEFAULT; $('fDirUrl').value = a.dirUrl || MAPS_DEFAULT;
   $('fListings').value = a.listings || ''; $('fLinkedin').value = a.linkedin || '';
+  $('fBooking').value = a.booking || '';
   $('fInstagram').value = a.instagram || ''; $('fWhatsapp').value = a.whatsapp || '';
   $('fFoto').value = a.foto || ''; if (a.logo) $('fLogo').value = a.logo;
   const ct = a.certs || {};
@@ -501,6 +646,11 @@ function applyAgent(a) {
   (a.extra || []).forEach(x => addLinkRow(x.icon, x.url));
   setIconStyle(a.iconStyle || 'solid');
   setCertsAlign(a.certsAlign || 'center');
+  if (a.tpl) state.tpl = a.tpl;
+  if (a.vis) {
+    const v = a.vis, box = { foto: 'vFoto', zona: 'vZona', social: 'vSocial', listings: 'vListings', booking: 'vBooking', qr: 'vQr', certs: 'vCerts', legal: 'vLegal' };
+    for (const k in box) { const el = $(box[k]); if (el && v[k] !== undefined) el.checked = !!v[k]; }
+  }
   document.querySelectorAll('#customCerts .xlink').forEach(n => n.remove());
   (a.customCerts || []).forEach(x => addCertRow(x.img, x.link));
   $('agentSearch').value = a.name || '';
@@ -515,6 +665,7 @@ function saveCurrentAgent() {
   if (j >= 0) AGENTS[j] = a; else AGENTS.push(a);
   $('agentSearch').value = a.name;
   renderAgentList('');
+  setDirty(false);
   render();
   toast('Agent saved in this browser.');
 }
@@ -539,10 +690,38 @@ function exportAgentsJSON() {
   a.download = 'agents.json'; a.click();
   toast('agents.json downloaded — replace data/agents.json and commit.');
 }
+// ---- Undo: a lightweight ring of form snapshots (button, no keyboard shortcut,
+// so the browser's native Ctrl+Z inside text fields keeps working). ----
+let undoStack = [], undoLock = false;
+function updateUndoBtn() { const b = $('btnUndo'); if (b) b.disabled = undoStack.length < 2; }
+function pushUndo(snap) {
+  if (undoLock || !snap) return;
+  if (undoStack[undoStack.length - 1] === snap) return;
+  undoStack.push(snap);
+  if (undoStack.length > 40) undoStack.shift();
+  updateUndoBtn();
+}
+function undoStep() {
+  if (undoStack.length < 2) return;
+  undoStack.pop();
+  let prev = null;
+  try { prev = JSON.parse(undoStack[undoStack.length - 1]); } catch {}
+  if (!prev) return;
+  undoLock = true;
+  applyAgent(prev);
+  undoLock = false;
+  setDirty(true);
+  updateUndoBtn();
+  render();
+}
 let saveT = null;
 function autosave() {
   clearTimeout(saveT);
-  saveT = setTimeout(() => { try { localStorage.setItem(LS_FORM, JSON.stringify(collectAgent('draft'))); } catch {} }, 600);
+  saveT = setTimeout(() => {
+    const snap = collectAgent('draft');
+    try { localStorage.setItem(LS_FORM, JSON.stringify(snap)); } catch {}
+    pushUndo(JSON.stringify(snap));
+  }, 600);
 }
 function restoreAutosave() {
   try {
@@ -553,49 +732,86 @@ function restoreAutosave() {
 }
 function fillAgent(a) {
   applyAgent(a);
+  setDirty(false);
   render();
 }
+let agentHi = -1;
+function openAgentList(input) {
+  renderAgentList(input.value);
+  $('agentList').classList.remove('hidden');
+  $('agentSearch').setAttribute('aria-expanded', 'true');
+  placeFixed($('agentList'), input, 220);
+}
+function closeAgentList() {
+  $('agentList').classList.add('hidden');
+  $('agentSearch').setAttribute('aria-expanded', 'false');
+  agentHi = -1;
+}
 function renderAgentList(filter = '') {
-  const list = $('agentList'); const q = filter.trim().toLowerCase();
-  const hits = AGENTS.filter(a => a.name.toLowerCase().includes(q) || a.role.toLowerCase().includes(q));
-  list.innerHTML = hits.length ? hits.map(a => {
-    const ini = a.name.split(' ').map(w => w[0]).slice(0, 2).join('');
+  const list = $('agentList'); const q = String(filter || '').trim().toLowerCase();
+  const hits = AGENTS.filter(a => String(a.name || '').toLowerCase().includes(q) || String(a.role || '').toLowerCase().includes(q));
+  list.innerHTML = hits.length ? hits.map((a, i) => {
+    const ini = String(a.name || '?').split(' ').map(w => w[0]).slice(0, 2).join('');
     const custom = isCustom(a.key);
-    return `<div class="agent-item" data-key="${a.key}"><span class="avatar">${ini}</span><span style="flex:1"><b>${a.name}</b><small>${a.role}${custom ? ' · saved' : ''}</small></span>${custom ? '<span class="agent-del" title="Delete saved agent">✕</span>' : ''}</div>`;
+    return `<div class="agent-item${i === agentHi ? ' hi' : ''}" role="option" aria-selected="${i === agentHi}" data-key="${esc(a.key)}"><span class="avatar">${esc(ini)}</span><span style="flex:1"><b>${esc(a.name)}</b><small>${esc(a.role)}${custom ? ' · saved' : ''}</small></span>${custom ? '<span class="agent-del" title="Delete saved agent">✕</span>' : ''}</div>`;
   }).join('') : '<div class="agent-none">No agents found</div>';
   list.querySelectorAll('.agent-item').forEach(el => el.onmousedown = e => {
     e.preventDefault();
     if (e.target.closest('.agent-del')) { deleteCustomAgent(el.dataset.key); return; }
     fillAgent(AGENTS.find(x => x.key === el.dataset.key));
-    list.classList.add('hidden');
+    closeAgentList();
   });
 }
 
-document.querySelectorAll('#certsAlignSeg button').forEach(b => b.onclick = () => { setCertsAlign(b.dataset.a); render(); });
-document.querySelectorAll('#iconStyleSeg button').forEach(b => b.onclick = () => { setIconStyle(b.dataset.s); render(); });
+document.querySelectorAll('#certsAlignSeg button').forEach(b => b.onclick = () => { setCertsAlign(b.dataset.a); markDirty(); });
+document.querySelectorAll('#iconStyleSeg button').forEach(b => b.onclick = () => { setIconStyle(b.dataset.s); markDirty(); });
 document.querySelectorAll('.rail button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.rail button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.editor .card').forEach(c => c.classList.toggle('show', c.id === b.dataset.sec));
 });
-document.querySelectorAll('#tplGrid .tpl').forEach(b => b.onclick = () => { state.tpl = b.dataset.tpl; render(); });
-document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; render(); });
-['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', render));
-$('fColorHex').addEventListener('change', e => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('fColor').value = e.target.value; render(); });
+document.querySelectorAll('#tplGrid .tpl').forEach(b => b.onclick = () => { state.tpl = b.dataset.tpl; markDirty(); });
+document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; markDirty(); });
+['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fBooking','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vBooking','vQr','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', markDirty));
+$('fColorHex').addEventListener('change', e => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('fColor').value = e.target.value; markDirty(); });
 $('fFotoFile').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
-  const fr = new FileReader(); fr.onload = () => { $('fFoto').value = fr.result; render(); toast('Photo loaded (for the final email use a public https link).'); }; fr.readAsDataURL(f);
+  const fr = new FileReader(); fr.onload = () => { $('fFoto').value = fr.result; markDirty(); toast('Photo loaded (for the final email use a public https link).'); }; fr.readAsDataURL(f);
 });
-$('btnAddLink').onclick = () => addLinkRow();
-$('btnAddCert').onclick = () => addCertRow();
+$('btnAddLink').onclick = () => { addLinkRow(); setDirty(true); };
+$('btnAddCert').onclick = () => { addCertRow(); setDirty(true); };
 $('btnCopyRich').onclick = copyRich; $('btnCopyHtml').onclick = copyHtml; $('btnDownload').onclick = download;
-$('agentSearch').addEventListener('focus', e => { renderAgentList(e.target.value); $('agentList').classList.remove('hidden'); placeFixed($('agentList'), e.target, 220); });
-$('agentSearch').addEventListener('input', e => { renderAgentList(e.target.value); $('agentList').classList.remove('hidden'); placeFixed($('agentList'), e.target, 220); });
-$('agentSearch').addEventListener('blur', () => setTimeout(() => $('agentList').classList.add('hidden'), 150));
-$('agentSearch').addEventListener('keydown', e => { if (e.key === 'Enter') { const first = $('agentList').querySelector('.agent-item'); if (first) { fillAgent(AGENTS.find(x => x.key === first.dataset.key)); $('agentList').classList.add('hidden'); } } });
+$('btnVcf').onclick = downloadVcf;
+$('btnUndo').onclick = undoStep;
+$('agentSearch').addEventListener('focus', e => openAgentList(e.target));
+$('agentSearch').addEventListener('input', e => { agentHi = -1; openAgentList(e.target); });
+$('agentSearch').addEventListener('blur', () => setTimeout(() => closeAgentList(), 150));
+$('agentSearch').addEventListener('keydown', e => {
+  const items = [...$('agentList').querySelectorAll('.agent-item')];
+  if (e.key === 'Escape') { closeAgentList(); return; }
+  if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && items.length) {
+    e.preventDefault();
+    if ($('agentList').classList.contains('hidden')) openAgentList(e.target);
+    const max = items.length - 1;
+    agentHi = e.key === 'ArrowDown' ? Math.min(agentHi + 1, max) : Math.max(agentHi - 1, 0);
+    items.forEach((it, i) => { it.classList.toggle('hi', i === agentHi); it.setAttribute('aria-selected', String(i === agentHi)); });
+    items[agentHi].scrollIntoView({ block: 'nearest' });
+    return;
+  }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const pick = items[agentHi] || items[0];
+    if (pick) { fillAgent(AGENTS.find(x => x.key === pick.dataset.key)); closeAgentList(); }
+  }
+});
 $('toggleCode').onchange = e => $('codeBox').classList.toggle('hidden', !e.target.checked);
 $('btnSaveAgent').onclick = saveCurrentAgent;
 $('btnExportAgents').onclick = exportAgentsJSON;
 $('btnReloadDb').onclick = () => loadAgents().then(() => { renderAgentList($('agentSearch').value); render(); });
 $('fSheetId').addEventListener('change', e => { try { localStorage.setItem(LS_SHEET, e.target.value.trim()); } catch {} });
 try { const sid = localStorage.getItem(LS_SHEET); if (sid) $('fSheetId').value = sid; } catch {}
-loadAgents().then(() => { restoreAutosave(); render(); });
+loadAgents().then(() => {
+  restoreAutosave();
+  render();
+  setDirty(false);
+  pushUndo(JSON.stringify(collectAgent('draft')));
+});

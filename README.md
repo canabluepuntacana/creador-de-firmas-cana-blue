@@ -41,10 +41,44 @@ git push -u origin main
 ## Google Sheets database
 
 1. Create a spreadsheet with a tab named `Agentes` and this exact header row:
-   `key | name | role | zona | tel | email | web | dir | dirUrl | listings | linkedin | instagram | whatsapp | foto | logo | color | iconStyle | certsAlign | crs | aei | realtor | sr23 | sr24 | lux`
-   Cert columns use `TRUE` / `FALSE`; `iconStyle` is `solid`, `rounded`, `outline`, `frame`, `line` or `soft`; `certsAlign` is `left`, `center` or `right`.
+   `key | name | role | zona | tel | email | web | dir | dirUrl | listings | booking | linkedin | instagram | whatsapp | foto | logo | color | tpl | iconStyle | certsAlign | qr | crs | aei | realtor | sr23 | sr24 | lux`
+   Cert columns and `qr` use `TRUE` / `FALSE`; `iconStyle` is `solid`, `rounded`, `outline`, `frame`, `line` or `soft`; `certsAlign` is `left`, `center` or `right`; `tpl` is the template key (`principal`, `broker`, `moderna`, `banner`, `sidebar`, `photo-left`, `photo-top`, `photo-right`).
+   Leave `booking` empty to hide the "Schedule a Call" button.
 2. Share → General access → **Anyone with the link** (Viewer).
 3. Copy the spreadsheet ID from its URL (`/d/ID/edit`) and paste it in the
    creator's **Google Sheet ID** field → **Reload**. The ID is remembered.
 4. The creator loads Sheets first, then `data/agents.json`, then built-ins.
    Browser-saved agents always merge on top.
+
+## Optional signature pieces
+
+- **View My Listings** — pill button, uses the `listings` URL. Toggle in **Display**.
+- **Schedule a Call** — pill button, appears only when the `booking` URL is set. Toggle in **Display**.
+- **Contact QR (vCard)** — encodes the agent's vCard (name, title, phone, email, site,
+  address) so a scan saves the contact. It ships as an embedded PNG, no image host needed.
+  Off by default; enable it in **Display**. **Download contact (.vcf)** exports the same
+  data as a file.
+- **Certification alignment** and **icon style** are per agent.
+
+## Email client notes
+
+- Everything is table-based and uses inline styles, so Gmail, Outlook, Apple Mail and
+  mobile clients render it as-is.
+- **Images are hosted remotely** (icons8 for icons, Cloudinary for photos/logos/certs).
+  Most clients block remote images until the recipient allows them — that is normal for
+  signatures. To drop the icons8 dependency, set `ICON_BASE` at the top of `app.js` to
+  your own folder and upload the same PNGs there.
+- **Outlook desktop renders `border-radius` as square corners**, so the *Rounded*,
+  *Outline*, *Square line* and *Soft* icon styles lose their rounding there (they still
+  look correct in Gmail/Apple Mail/mobile). Fixing that needs VML markup, which is not
+  included because it cannot be verified in this environment — test in real Outlook first.
+- The toolbar shows the **weight of the copied HTML**; Gmail clips signatures over ~102 KB.
+- After deploying a change, bump the `?v=` query on `styles.css` / `app.js` in
+  `index.html` (GitHub Pages caches them aggressively).
+
+## Editor shortcuts
+
+- **Undo** button (top of the preview) steps back through your edits. Native `Ctrl+Z`
+  inside a text field keeps working as usual.
+- The agent dropdown supports `↑` / `↓`, `Enter` to pick and `Esc` to close.
+- **Unsaved changes** appears when the form differs from what is stored.

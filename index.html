@@ -4,9 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Signature Creator · Canablue</title>
+<meta name="description" content="Build a professional Canablue email signature and copy it straight into Gmail or Outlook.">
+<meta name="theme-color" content="#174176">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Canablue">
+<meta property="og:title" content="Canablue Email Signature Creator">
+<meta property="og:description" content="Build a professional signature and paste it straight into Gmail or Outlook.">
+<meta property="og:image" content="https://canabluepuntacana.github.io/creador-de-firmas-cana-blue/assets/og-image.png">
+<meta property="og:url" content="https://canabluepuntacana.github.io/creador-de-firmas-cana-blue/">
+<meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.cdnfonts.com/css/google-sans" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+<link rel="stylesheet" href="styles.css?v=20261016">
+<script src="assets/iconify-icon.min.js?v=20261016"></script>
+<script src="assets/qrcode.min.js?v=20261016"></script>
 </head>
 <body>
 <header class="topbar">
@@ -14,7 +26,7 @@
     <img src="assets/logo-canablue.png" alt="Canablue" id="brandLogo">
     <div>
       <strong>Signature Creator</strong>
-      <span>Canablue · Real Estate Made Easy</span>
+      <span>Canablue · signature builder for agents</span>
     </div>
   </div>
   <div class="top-actions">
@@ -65,8 +77,8 @@
       <h3><iconify-icon icon="mdi:account"></iconify-icon> Contact details</h3>
       <label class="lbl">Agent</label>
       <div class="agent-select">
-        <input id="agentSearch" value="Pamela Núñez" placeholder="Search agent..." autocomplete="off">
-        <div id="agentList" class="agent-list hidden"></div>
+        <input id="agentSearch" value="Pamela Núñez" placeholder="Search agent..." autocomplete="off" role="combobox" aria-expanded="false" aria-controls="agentList" aria-autocomplete="list">
+        <div id="agentList" class="agent-list hidden" role="listbox"></div>
       </div>
       <p class="hint">Search and pick an agent to autofill every field.</p>
       <div class="row-btns">
@@ -97,6 +109,8 @@
       <input id="fDirUrl" value="https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111">
       <label class="lbl">My listings URL (View My Listings button)</label>
       <input id="fListings" value="https://canablue.com/author/pamepam/">
+      <label class="lbl">Booking / agenda URL (optional — adds a Schedule button)</label>
+      <input id="fBooking" placeholder="https://calendly.com/…">
     </section>
 
     <section class="card" id="sec-links">
@@ -175,11 +189,15 @@
         <label><input type="checkbox" id="vZona" checked> Show area of expertise</label>
         <label><input type="checkbox" id="vSocial" checked> Show social icons (IG / WhatsApp / LinkedIn)</label>
         <label><input type="checkbox" id="vListings" checked> Show "View My Listings" button</label>
+        <label><input type="checkbox" id="vBooking" checked> Show "Schedule" button (uses the booking URL)</label>
+        <label><input type="checkbox" id="vQr"> Show contact QR code (vCard)</label>
         <label><input type="checkbox" id="vCerts" checked> Show certifications</label>
         <label><input type="checkbox" id="vLegal" checked> Show legal notice</label>
       </div>
       <label class="lbl">Legal notice</label>
       <textarea id="fLegal" rows="2">The information in this email is confidential and intended solely for its recipient.</textarea>
+      <p class="hint">The QR code encodes a vCard, so a scan saves the agent straight to the phone's contacts. It is embedded in the signature (no extra image host needed).</p>
+      <button id="btnVcf" class="btn small"><iconify-icon icon="mdi:account-card-details-outline"></iconify-icon> Download contact (.vcf)</button>
     </section>
   </aside>
 
@@ -190,7 +208,12 @@
         <strong>Preview</strong>
         <span class="hint">What you see is what pastes into Gmail / Outlook.</span>
       </div>
-      <label class="switch"><input type="checkbox" id="toggleCode"> Show HTML code</label>
+      <div class="tool-right">
+        <span class="chip warn" id="dirtyChip" hidden>Unsaved changes</span>
+        <span class="chip" id="sizeChip" title="Weight of the HTML you copy. Gmail clips signatures over 102 KB.">—</span>
+        <button id="btnUndo" class="btn small" disabled>Undo</button>
+        <label class="switch"><input type="checkbox" id="toggleCode"> Show HTML code</label>
+      </div>
     </div>
     <div class="preview-box">
       <div id="sigPreview"></div>
@@ -205,6 +228,6 @@
   </section>
 </main>
 
-<script src="app.js"></script>
+<script src="app.js?v=20261016"></script>
 </body>
 </html>
