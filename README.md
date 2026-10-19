@@ -77,9 +77,10 @@ deletes them.
 ## Preview width
 
 The toolbar has two buttons: **desktop** (fluid, as wide as the panel) and **mobile**
-(locked to a 390 px phone frame). In mobile mode the signature is zoomed down to fit the
-frame, which is how fixed-width tables look on a phone. Your choice is remembered in the
-browser.
+(a phone frame whose screen is a 390 × 844 px viewport, the logical size of an iPhone
+14/15). In mobile mode the signature is zoomed down to fit that viewport and scrolls
+inside it, which is how fixed-width tables look on a phone. Your choice is remembered in
+the browser.
 
 ## Email client notes
 

@@ -806,7 +806,8 @@ function fitMobile() {
   if (!table) return;
   table.style.zoom = '';
   if (!box.classList.contains('mobile')) return;
-  const avail = sig.clientWidth - 28;
+  const cs = getComputedStyle(sig);
+  const avail = sig.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
   const natW = table.offsetWidth || 0;
   if (avail > 0 && natW > avail) table.style.zoom = (avail / natW).toFixed(3);
 }
