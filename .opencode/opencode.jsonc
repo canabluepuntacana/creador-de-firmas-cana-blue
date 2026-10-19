@@ -1,14 +1,18 @@
 {
   "$schema": "https://opencode.ai/config.json",
   // Project MCP servers for creador-de-firmas-cana-blue.
-  // - github: official GitHub MCP (OAuth). Run /mcps and sign in when asked.
+  // - github: official GitHub MCP (PAT via GITHUB_PAT; OAuth no soporta DCR).
   // - playwright: renders/tests the signature page in a real browser (needs Node.js).
   // - filesystem: scoped file access to this project (needs Node.js).
   "mcp": {
     "servers": {
       "github": {
         "type": "remote",
-        "url": "https://api.githubcopilot.com/mcp/"
+        "url": "https://api.githubcopilot.com/mcp/",
+        "oauth": false,
+        "headers": {
+          "Authorization": "Bearer {env:GITHUB_PAT}"
+        }
       },
       "playwright": {
         "type": "local",
