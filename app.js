@@ -64,11 +64,11 @@ function socialIcon(url, key, style, c) {
   const hex = bg.charAt(0) === '#' ? bg.slice(1) : bg;
   const box = 'display:inline-block;text-align:center;vertical-align:middle;';
   const im = (src, s, mt) => `<img src="${src}" width="${s}" height="${s}" alt="${n.label}" style="display:inline-block;width:${s}px;height:${s}px;margin-top:${mt}px;border:0;">`;
-  if (style === 'rounded') return `<a href="${url}" target="_blank" style="${box}width:28px;height:28px;border-radius:8px;background-color:${bg};">${im(n.img, 15, 6)}</a>`;
-  if (style === 'outline') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:50%;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), 14, 6)}</a>`;
-  if (style === 'frame') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:8px;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), 14, 6)}</a>`;
+  if (style === 'rounded') return `<a href="${url}" target="_blank" style="${box}width:24px;height:24px;border-radius:8px;background-color:${bg};">${im(n.img, 13, 5)}</a>`;
+  if (style === 'outline') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:50%;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), 16, 4)}</a>`;
+  if (style === 'frame') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:8px;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), 16, 4)}</a>`;
   if (style === 'line') return `<a href="${url}" target="_blank" style="${box}">${im(networkGlyph(n, hex), 24, 0)}</a>`;
-  if (style === 'soft') return `<a href="${url}" target="_blank" style="${box}width:28px;height:28px;border-radius:50%;background-color:${hexA(bg, .14)};">${im(networkGlyph(n, hex), 15, 6)}</a>`;
+  if (style === 'soft') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:50%;background-color:${hexA(bg, .14)};">${im(networkGlyph(n, hex), 16, 4)}</a>`;
   return socialBtn(url, bg, n.img, n.label);
 }
 function extraBtn(e, c, style) { return socialIcon(e.url, e.icon, style || 'solid', c); }
@@ -174,7 +174,7 @@ function contactRow(iconUrl, contentHtml, alt) {
   return `<tr><td width="22" style="vertical-align:middle;padding:3px 0;"><img src="${iconUrl}" width="15" height="15" style="display:block;width:15px;height:15px;" alt="${alt || ''}"></td><td style="vertical-align:middle;font-size:12px;line-height:17px;color:#222222;font-family:Arial,Helvetica,sans-serif;">${contentHtml}</td></tr>`;
 }
 function socialBtn(href, bg, iconUrl, alt) {
-  return `<a href="${href}" target="_blank" style="display:inline-block;width:28px;height:28px;border-radius:50%;background-color:${bg};text-align:center;vertical-align:middle;"><img src="${iconUrl}" width="15" height="15" alt="${alt}" style="display:inline-block;width:15px;height:15px;margin-top:6px;border:0;"></a>`;
+  return `<a href="${href}" target="_blank" style="display:inline-block;width:24px;height:24px;border-radius:50%;background-color:${bg};text-align:center;vertical-align:middle;"><img src="${iconUrl}" width="13" height="13" alt="${alt}" style="display:inline-block;width:13px;height:13px;margin-top:5px;border:0;"></a>`;
 }
 // Pill button with modern home icon, placed next to the Canablue logo
 function viewPropsBtn(listings, c) {
@@ -188,7 +188,7 @@ function scheduleBtn(url, c) {
 }
 // Plain clean text, no pill background or border
 function zonaText(zona) {
-  return `<div style="margin-top:5px;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;color:#5b6b84;line-height:16px;">Specializing in ${zona}</div>`;
+  return `<div style="max-width:190px;margin-top:5px;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;color:#5b6b84;line-height:16px;">Specializing in ${zona}</div>`;
 }
 // Logos only, no heading label
 const CERT_DEFS = [
@@ -207,9 +207,9 @@ function certImgs(certs, links, customs, h) {
 }
 function certsRow(certs, links, customs, vis, align) {
   if (!vis.certs) return '';
-  const imgs = certImgs(certs, links, customs, 30);
+  const imgs = certImgs(certs, links, customs, 26);
   if (!imgs.length) return '';
-  return `<tr><td align="${align || 'center'}" style="padding-top:12px;"><div>${imgs.join('&nbsp;&nbsp;')}</div></td></tr>`;
+  return `<tr><td align="${align || 'center'}" style="padding-top:12px;"><div>${imgs.join(' ')}</div></td></tr>`;
 }
 /* Extra links render as social circles appended to `socials` (see above). */
 
@@ -254,7 +254,7 @@ async function buildHTML() {
   if (s.extra.length) {
     socialParts = socialParts.concat(s.extra.filter(e => String(e.url || '').trim()).map(e => extraBtn(e, c, ist)));
   }
-  const socials = (!s.vis.social || !socialParts.length) ? '' : socialParts.join('&nbsp;');
+  const socials = (!s.vis.social || !socialParts.length) ? '' : socialParts.join(' ');
 
   const legal = s.vis.legal
     ? `<tr><td style="padding-top:12px;font-size:10px;line-height:14px;color:#8a94a8;text-align:center;font-family:Arial,Helvetica,sans-serif;max-width:560px;">${s.legal}</td></tr>` : '';
@@ -276,7 +276,7 @@ async function buildHTML() {
 <td width="1" style="background-color:${c};width:1px;font-size:0;">&nbsp;</td><td width="20"></td>
 <td valign="top"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td></tr>
 <tr><td colspan="4"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:14px;border-top:1px solid ${c};"><tbody><tr>
-<td valign="middle" align="${cal}" style="padding-top:12px;">${s.vis.certs ? certImgs(s.certs, s.certLinks, s.customCerts, 28).join('&nbsp;') : ''}</td>
+<td valign="middle" align="${cal}" style="padding-top:12px;">${s.vis.certs ? certImgs(s.certs, s.certLinks, s.customCerts, 26).join(' ') : ''}</td>
 <td align="right" valign="middle" style="padding-top:12px;"><img src="${logoUrl}" width="130" style="width:130px;max-width:130px;display:inline-block;" alt="Canablue"><div style="padding-top:8px;">${viewBtn}</div><div style="padding-top:8px;">${socials}</div></td>
 </tr></tbody></table></td></tr>${qr}${legal}</tbody></table>`;
   }
@@ -369,9 +369,9 @@ async function buildHTML() {
 <td width="24"></td><td width="1" style="border-left:1px solid ${c};font-size:0;">&nbsp;</td><td width="24"></td>
 <td valign="middle"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
 </tr></tbody></table></td></tr>
-<tr><td style="padding:14px 0 0;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div></td></tr>
+<tr><td style="padding:14px 0 0;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;max-width:100%;">&nbsp;</div></td></tr>
 <tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
-<td valign="middle"><table cellpadding="0" cellspacing="0" border="0"><tbody><tr><td valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td><td width="14"></td><td valign="middle">${viewBtn}</td></tr></tbody></table></td>
+<td valign="middle"><table cellpadding="0" cellspacing="0" border="0"><tbody><tr><td valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td><td width="10"></td><td valign="middle">${viewBtn}</td></tr></tbody></table></td>
 <td align="right" valign="middle">${socials}</td></tr></tbody></table></td></tr>
 ${certs}${qr}${legal}</tbody></table>`;
 }
@@ -382,7 +382,6 @@ async function render() {
   $('sigPreview').innerHTML = html;
   $('codeText').textContent = html;
   updateStats(html);
-  fitMobile();
   autosave();
   return html;
 }
@@ -795,10 +794,23 @@ function renderAgentList(filter = '') {
   });
 }
 
-// ---- Preview width: desktop (fluid) or mobile (locked to a 390 px phone viewport).
-// The choice is remembered in this browser. In mobile mode the signature is zoomed
-// down to fit the frame, which is how fixed-width tables actually look on a phone.
+// ---- Preview width: desktop (fluid) or mobile (a 390 x 844 phone viewport).
+// Mobile mail clients squeeze the signature to the screen width instead of
+// shrinking it as a whole, so the preview does the same and shows the real
+// line breaks (that is where "View My Listings" or a social icon can wrap).
 const LS_VIEW = 'canablue.view.v1';
+function setViewport(vp) {
+  const mobile = vp === 'mobile';
+  const box = document.querySelector('.preview-box');
+  if (!box) return;
+  box.classList.toggle('mobile', mobile);
+  document.querySelectorAll('#vpSeg button').forEach(b => {
+    const on = (b.dataset.vp === 'mobile') === mobile;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+  try { localStorage.setItem(LS_VIEW, mobile ? 'mobile' : 'desktop'); } catch {}
+}
 function fitMobile() {
   const box = document.querySelector('.preview-box'), sig = $('sigPreview');
   if (!box || !sig) return;
@@ -810,19 +822,7 @@ function fitMobile() {
   const avail = sig.clientWidth - (parseFloat(cs.paddingLeft) || 0) - (parseFloat(cs.paddingRight) || 0);
   const natW = table.offsetWidth || 0;
   if (avail > 0 && natW > avail) table.style.zoom = (avail / natW).toFixed(3);
-}
-function setViewport(vp) {
-  const mobile = vp === 'mobile';
-  const box = document.querySelector('.preview-box');
-  if (!box) return;
-  box.classList.toggle('mobile', mobile);
-  document.querySelectorAll('#vpSeg button').forEach(b => {
-    const on = (b.dataset.vp === 'mobile') === mobile;
-    b.classList.toggle('on', on);
-    b.setAttribute('aria-pressed', String(on));
-  });
-  fitMobile();
-  try { localStorage.setItem(LS_VIEW, mobile ? 'mobile' : 'desktop'); } catch {}
+  return { zoom: table.style.zoom, natW, avail };
 }
 document.querySelectorAll('#vpSeg button').forEach(b => b.onclick = () => setViewport(b.dataset.vp));
 window.addEventListener('resize', () => { if (document.querySelector('.preview-box').classList.contains('mobile')) fitMobile(); });
