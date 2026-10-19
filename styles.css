@@ -85,6 +85,7 @@ textarea{resize:vertical}
 .agent-item small{color:var(--muted);font-size:11.5px}
 .agent-none{padding:10px;font-size:12.5px;color:var(--muted);text-align:center}
 .row-btns{display:flex;gap:8px;margin-top:10px}
+.row-btns .btn{flex:1;justify-content:center}
 .db-row{display:flex;gap:8px}
 .db-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#b0bac9;margin-right:6px}
 .db-dot.ok{background:#2f9e44}
@@ -125,6 +126,14 @@ textarea{resize:vertical}
 .preview-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px}
 .preview-box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px;overflow:auto}
 #sigPreview{display:flex;justify-content:center}
+/* Mobile preview: a solid dark shell (no strokes) that locks the signature to a 390 px
+   viewport so you can see how it wraps on a phone. */
+.vp-seg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:#eef3fb}
+.vp-seg button{border:0;background:transparent;border-radius:999px;padding:5px 11px;cursor:pointer;color:#5b6b85;display:inline-flex;align-items:center;line-height:1;font-size:15px}
+.vp-seg button.on{background:var(--primary);color:#fff;box-shadow:0 3px 8px rgba(23,65,118,.28)}
+.vp-seg button:disabled{opacity:.4}
+.preview-box.mobile{width:390px;max-width:100%;margin:0 auto;padding:12px;border-radius:30px;background:#0d1b33;box-shadow:0 18px 40px rgba(13,27,51,.22)}
+.preview-box.mobile #sigPreview{display:block;background:#fff;border-radius:20px;padding:14px;overflow:auto;min-height:220px}
 .switch{font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer}
 .switch input{width:auto}
 .tool-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}

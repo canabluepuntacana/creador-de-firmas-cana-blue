@@ -38,6 +38,20 @@ git push -u origin main
 - Browser `localStorage` — form autosave + custom agents saved with **Save agent**.
 - **Export JSON** downloads `agents.json` — replace the file and commit to publish.
 
+Buttons in **Contact details**:
+
+| Button | What it does |
+|---|---|
+| **Save agent** | Stores the current form in this browser (`localStorage`). Saved agents appear in the dropdown with a `saved` mark. |
+| **Save & new** | Saves the current agent, then clears the form for the next one. |
+| **New agent** | Clears the form for a new agent without saving. Asks first if there are unsaved changes. |
+| **Export JSON** | Downloads `agents.json` with everything merged. |
+
+Everything is kept in the browser cache (`localStorage`), so reloading or closing the tab
+does not lose your work: the current form is autosaved and every **Save agent** stays in
+the list until you delete it with the `✕` on its row. Clearing the browser's site data
+deletes them.
+
 ## Google Sheets database
 
 1. Create a spreadsheet with a tab named `Agentes` and this exact header row:
@@ -59,6 +73,13 @@ git push -u origin main
   Off by default; enable it in **Display**. **Download contact (.vcf)** exports the same
   data as a file.
 - **Certification alignment** and **icon style** are per agent.
+
+## Preview width
+
+The toolbar has two buttons: **desktop** (fluid, as wide as the panel) and **mobile**
+(locked to a 390 px phone frame). In mobile mode the signature is zoomed down to fit the
+frame, which is how fixed-width tables look on a phone. Your choice is remembered in the
+browser.
 
 ## Email client notes
 

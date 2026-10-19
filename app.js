@@ -23,6 +23,7 @@ const state = {
   vis: { foto: true, zona: true, social: true, listings: true, booking: true, qr: false, certs: true, legal: true },
   legal: 'The information in this email is confidential and intended solely for its recipient.'
 };
+const DEFAULT_LEGAL = 'The information in this email is confidential and intended solely for its recipient.';
 const BRAND = { instagram: '#000000', whatsapp: '#25D366', linkedin: '#0A66C2' };
 // Single base for the signature icon PNGs. Point this at your own host (e.g. your
 // Cloudinary folder) to stop depending on the icons8 CDN — see README.
@@ -381,6 +382,7 @@ async function render() {
   $('sigPreview').innerHTML = html;
   $('codeText').textContent = html;
   updateStats(html);
+  fitMobile();
   autosave();
   return html;
 }
@@ -392,7 +394,8 @@ function updateStats(html) {
   chip.textContent = kb.toFixed(1) + ' KB';
   chip.classList.toggle('warn', kb >= 100);
 }
-function setDirty(on) { const d = $('dirtyChip'); if (d) d.hidden = !on; }
+let isDirty = false;
+function setDirty(on) { isDirty = !!on; const d = $('dirtyChip'); if (d) d.hidden = !on; }
 function markDirty() { setDirty(true); render(); }
 function syncStateFromInputs() {
   state.color = $('fColor').value || '#174176'; $('fColorHex').value = state.color.toUpperCase();
@@ -535,6 +538,22 @@ const BUILTIN_AGENTS = [
 ];
 let AGENTS = BUILTIN_AGENTS.slice();
 let JSON_AGENTS = [];
+// A brand-new, empty agent: what "New agent" loads before you type anything.
+const LOGO_DEFAULT = 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792071937/10._logo-blue-google.png';
+function blankAgent() {
+  return {
+    key: '', color: '#174176', name: '', role: '', zona: '', tel: '', email: '',
+    web: 'canablue.com', dir: DIR_DEFAULT, dirUrl: MAPS_DEFAULT,
+    listings: '', booking: '', linkedin: '', instagram: '', whatsapp: '',
+    foto: '', logo: LOGO_DEFAULT,
+    extra: [], tpl: 'principal',
+    vis: { foto: true, zona: true, social: true, listings: true, booking: true, qr: false, certs: true, legal: true },
+    iconStyle: 'solid', certsAlign: 'center',
+    certLinks: { crs: '', aei: '', realtor: '', sr23: '', sr24: '', lux: '' },
+    customCerts: [],
+    certs: { crs: false, aei: false, realtor: false, sr23: false, sr24: false, lux: false }
+  };
+}
 // ---- Static-page persistence: data/agents.json (shared source of truth, via fetch)
 // + localStorage (per-browser autosave + custom agents). ----
 const LS_FORM = 'canablue.form.v3', LS_CUSTOM = 'canablue.agents.custom.v1';
@@ -657,7 +676,7 @@ function applyAgent(a) {
 }
 function saveCurrentAgent() {
   const a = collectAgent(slug($('fNombre').value));
-  if (!a.name) { toast('Enter the agent name first.'); return; }
+  if (!a.name) { toast('Enter the agent name first.'); return false; }
   const cs = getCustoms(); const i = cs.findIndex(x => x.key === a.key);
   if (i >= 0) cs[i] = a; else cs.push(a);
   setCustoms(cs);
@@ -668,6 +687,19 @@ function saveCurrentAgent() {
   setDirty(false);
   render();
   toast('Agent saved in this browser.');
+  return true;
+}
+// Start a fresh, empty agent (kept in this browser until you save it).
+function newAgent() {
+  applyAgent(blankAgent());
+  $('fLegal').value = DEFAULT_LEGAL;
+  setDirty(true);
+  render();
+  const n = $('fNombre'); if (n) n.focus();
+}
+function saveAndNew() {
+  if (!saveCurrentAgent()) return;
+  newAgent();
 }
 function deleteCustomAgent(key) {
   setCustoms(getCustoms().filter(x => x.key !== key));
@@ -726,7 +758,7 @@ function autosave() {
 function restoreAutosave() {
   try {
     const d = JSON.parse(localStorage.getItem(LS_FORM) || 'null');
-    if (!d || !d.name) return;
+    if (!d) return;
     applyAgent(d);
   } catch {}
 }
@@ -762,6 +794,38 @@ function renderAgentList(filter = '') {
     closeAgentList();
   });
 }
+
+// ---- Preview width: desktop (fluid) or mobile (locked to a 390 px phone viewport).
+// The choice is remembered in this browser. In mobile mode the signature is zoomed
+// down to fit the frame, which is how fixed-width tables actually look on a phone.
+const LS_VIEW = 'canablue.view.v1';
+function fitMobile() {
+  const box = document.querySelector('.preview-box'), sig = $('sigPreview');
+  if (!box || !sig) return;
+  const table = sig.firstElementChild;
+  if (!table) return;
+  table.style.zoom = '';
+  if (!box.classList.contains('mobile')) return;
+  const avail = sig.clientWidth - 28;
+  const natW = table.offsetWidth || 0;
+  if (avail > 0 && natW > avail) table.style.zoom = (avail / natW).toFixed(3);
+}
+function setViewport(vp) {
+  const mobile = vp === 'mobile';
+  const box = document.querySelector('.preview-box');
+  if (!box) return;
+  box.classList.toggle('mobile', mobile);
+  document.querySelectorAll('#vpSeg button').forEach(b => {
+    const on = (b.dataset.vp === 'mobile') === mobile;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+  fitMobile();
+  try { localStorage.setItem(LS_VIEW, mobile ? 'mobile' : 'desktop'); } catch {}
+}
+document.querySelectorAll('#vpSeg button').forEach(b => b.onclick = () => setViewport(b.dataset.vp));
+window.addEventListener('resize', () => { if (document.querySelector('.preview-box').classList.contains('mobile')) fitMobile(); });
+try { setViewport(localStorage.getItem(LS_VIEW) === 'mobile' ? 'mobile' : 'desktop'); } catch { setViewport('desktop'); }
 
 document.querySelectorAll('#certsAlignSeg button').forEach(b => b.onclick = () => { setCertsAlign(b.dataset.a); markDirty(); });
 document.querySelectorAll('#iconStyleSeg button').forEach(b => b.onclick = () => { setIconStyle(b.dataset.s); markDirty(); });
@@ -805,6 +869,12 @@ $('agentSearch').addEventListener('keydown', e => {
 });
 $('toggleCode').onchange = e => $('codeBox').classList.toggle('hidden', !e.target.checked);
 $('btnSaveAgent').onclick = saveCurrentAgent;
+$('btnSaveNew').onclick = saveAndNew;
+$('btnNewAgent').onclick = () => {
+  if (isDirty && !confirm('You have unsaved changes. Start a new agent anyway?')) return;
+  newAgent();
+  toast('New agent ready — fill in the details and click Save agent.');
+};
 $('btnExportAgents').onclick = exportAgentsJSON;
 $('btnReloadDb').onclick = () => loadAgents().then(() => { renderAgentList($('agentSearch').value); render(); });
 $('fSheetId').addEventListener('change', e => { try { localStorage.setItem(LS_SHEET, e.target.value.trim()); } catch {} });
