@@ -370,9 +370,9 @@ async function buildHTML() {
 <td valign="middle"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
 </tr></tbody></table></td></tr>
 <tr><td style="padding:14px 0 0;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;max-width:100%;">&nbsp;</div></td></tr>
-<tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
-<td valign="middle"><table cellpadding="0" cellspacing="0" border="0"><tbody><tr><td valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td><td width="10"></td><td valign="middle">${viewBtn}</td></tr></tbody></table></td>
-<td align="right" valign="middle">${socials}</td></tr></tbody></table></td></tr>
+<tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
+<td valign="middle"><table cellpadding="0" cellspacing="0" border="0" style="max-width:100%;"><tbody><tr><td valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td><td width="10"></td><td valign="middle" style="min-width:96px;">${viewBtn}</td></tr></tbody></table></td>
+<td align="right" valign="middle" style="min-width:96px;">${socials}</td></tr></tbody></table></td></tr>
 ${certs}${qr}${legal}</tbody></table>`;
 }
 
