@@ -208,8 +208,6 @@ function pillBtn(href, label, glyph, c, variant, opt) {
 function viewPropsBtn(listings, c, opt) { return pillBtn(listings, 'View My Listings', whiteGlyph('home'), c, 'filled', opt); }
 // Optional second pill: booking / agenda link (Calendly, etc.)
 function scheduleBtn(url, c, opt) { return pillBtn(url, 'Schedule a Call', whiteGlyph('calendar'), c, 'filled', opt); }
-// Optional third pill: Canablue community (white with brand border and brand text)
-function communityBtn(url, c, opt) { return pillBtn(url, 'Community', IMG('ios-filled', 50, c.replace('#', ''), 'friends'), c, 'outline', opt); }
 // Small community page pill for the "Community Expert" block (label only, no icon).
 function communityPill(label, url, c, opt) {
   const o = opt || {};
@@ -295,35 +293,29 @@ async function buildHTML() {
   const legalHtml = (sz) => s.vis.legal
     ? `<tr><td style="padding-top:12px;font-size:${(sz && sz.fs) || 10}px;line-height:${(sz && sz.lh) || 14}px;color:#8a94a8;text-align:center;font-family:Arial,Helvetica,sans-serif;max-width:560px;">${s.legal}</td></tr>` : '';
   const legal = legalHtml();
-  // Both pills are optional and disappear when the toggle is off or the URL is empty.
-  const pillsHtml = (opt) => {
-    const pills = [];
-    if (s.vis.listings && s.listings) pills.push(viewPropsBtn(s.listings, c, opt));
-    if (s.vis.booking && s.booking) pills.push(scheduleBtn(s.booking, c, opt));
-    if (s.vis.community && s.community) pills.push(communityBtn(s.community, c, opt));
-    return pills.join('&nbsp;');
-  };
-  const viewBtn = pillsHtml();
-
-  // Main template: the action line carries only the primary actions; the community
-  // links moved to their own "Community Expert:" line.
+  // Action pills (listings + optional booking). The community links live on their own
+  // "Community Expert:" line in every template, so they are no longer a pill here.
   const actionPills = (opt) => {
     const pills = [];
     if (s.vis.listings && s.listings) pills.push(viewPropsBtn(s.listings, c, opt));
     if (s.vis.booking && s.booking) pills.push(scheduleBtn(s.booking, c, opt));
     return pills.join('&nbsp;');
   };
-  // "Community Expert:" + one smaller pill per community page. Desktop keeps the
-  // label inline; the phone variant stacks the label above the pills so they never
-  // get squeezed in a 360 px column.
+  const viewBtn = actionPills();
+  // "Community Expert:" + one smaller pill per community page. The inline variant keeps
+  // the label and the pills on one centred line; the stacked one puts the pills under
+  // the label for narrow columns (phone, Dark Sidebar).
   const communityExpertHtml = (opt, stacked) => {
     if (!s.vis.community) return '';
     const o = opt || {};
     const links = COMMUNITY_LINKS.map(x => communityPill(x.label, x.url, c, o)).join('&nbsp;');
-    const label = `<span style="font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 11}px;color:#5b6b84;white-space:nowrap;">Community Expert:</span>`;
+    const label = `<span style="font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 12}px;font-weight:bold;color:#5b6b84;white-space:nowrap;">Community Expert:</span>`;
     if (stacked) return `<div>${label}</div><div style="padding-top:6px;">${links}</div>`;
-    return `${label}&nbsp;&nbsp;${links}`;
+    return `${label}&nbsp;${links}`;
   };
+  // Full-width row used by the seven compact templates.
+  const communityLine = (opt, stacked, span) => s.vis.community
+    ? `<tr><td${span ? ` colspan="${span}"` : ''} align="center" style="padding-top:12px;">${communityExpertHtml(opt, stacked)}</td></tr>` : '';
 
   const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign);
   const qr = (s.vis.qr && raw) ? qrRow(vcardText(raw), cal) : '';
@@ -340,9 +332,12 @@ async function buildHTML() {
     pill: { fs: 12, pad: '7px 14px', rad: 17, gs: 13 },
     socialK: 1.12, certH: 29, qrH: 104,
     legal: { fs: 10.5, lh: 15 },
-    community: { fs: 11.5, pfs: 10.5, pad: '5px 11px', rad: 15 },
-    communityMob: { fs: 11, pfs: 10, pad: '5px 9px', rad: 14 }
+    community: { fs: 13, pfs: 10.5, pad: '5px 11px', rad: 15 },
+    communityMob: { fs: 12.5, pfs: 10, pad: '5px 9px', rad: 14 }
   };
+  // Compact templates: the same block one notch smaller so it fits their 600 px row.
+  const COMM_SZ = { fs: 11.5, pfs: 9, pad: '4px 7px', rad: 12 };
+  const COMM_SZ_STACK = { fs: 11, pfs: 9, pad: '4px 7px', rad: 12 };
 
   if (s.tpl === 'broker') {
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
@@ -354,7 +349,7 @@ async function buildHTML() {
 <tr><td colspan="4"><table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:14px;border-top:1px solid ${c};"><tbody><tr>
 <td valign="middle" align="${cal}" style="padding-top:12px;">${s.vis.certs ? certImgs(s.certs, s.certLinks, s.customCerts, 26).join(' ') : ''}</td>
 <td align="right" valign="middle" style="padding-top:12px;"><img src="${logoUrl}" width="130" style="width:130px;max-width:130px;display:inline-block;" alt="Canablue"><div style="padding-top:8px;">${viewBtn}</div><div style="padding-top:8px;">${socials}</div></td>
-</tr></tbody></table></td></tr>${qr}${legal}</tbody></table>`;
+</tr></tbody></table></td></tr>${communityLine(COMM_SZ, false, 4)}${qr}${legal}</tbody></table>`;
   }
   if (s.tpl === 'moderna') {
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
@@ -365,7 +360,7 @@ async function buildHTML() {
 <tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:16px 22px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
 <td valign="top" width="55%"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
 <td valign="top" align="right"><img src="${logoUrl}" width="125" style="width:125px;display:inline-block;" alt="Canablue"><div style="margin-top:10px;">${viewBtn}</div><div style="margin-top:10px;">${socials}</div></td>
-</tr></tbody></table>${certs}${qr}${legal}</td></tr></tbody></table>`;
+</tr></tbody></table>${communityLine(COMM_SZ)}${certs}${qr}${legal}</td></tr></tbody></table>`;
   }
   if (s.tpl === 'banner') {
     const sqPhoto = s.vis.foto ? `<img src="${s.foto}" width="84" height="84" style="width:84px;height:84px;border-radius:50%;object-fit:cover;display:block;border:3px solid #ffffff;" alt="${s.nombre}">` : '';
@@ -378,7 +373,7 @@ async function buildHTML() {
 <td valign="top" width="56%"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
 <td valign="middle" align="center"><div>${viewBtn}</div><div style="margin-top:12px;">${socials}</div><div style="margin-top:12px;"><img src="${logoUrl}" width="115" style="width:115px;display:inline-block;" alt="Canablue"></div></td>
 </tr></tbody></table></td></tr>
-<tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:0 22px 18px;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td></tr>
+<tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:0 22px 18px;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div><table cellpadding="0" cellspacing="0" border="0" width="100%">${communityLine(COMM_SZ)}${certs}${qr}${legal}</table></td></tr>
 </tbody></table>`;
   }
   if (s.tpl === 'sidebar') {
@@ -393,7 +388,7 @@ async function buildHTML() {
 <table cellpadding="0" cellspacing="0" border="0">${rows}</table>
 <div style="margin-top:12px;">${viewBtn}</div>
 <div style="margin-top:14px;"><img src="${logoUrl}" width="120" style="width:120px;display:inline-block;" alt="Canablue"></div>
-<table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td>
+<table cellpadding="0" cellspacing="0" border="0" width="100%">${communityLine(COMM_SZ_STACK, true)}${certs}${qr}${legal}</table></td>
 </tr></tbody></table>`;
   }
   if (s.tpl === 'photo-left') {
@@ -407,7 +402,7 @@ async function buildHTML() {
 <table cellpadding="0" cellspacing="0" border="0">${rows}</table>
 <div style="margin-top:10px;">${viewBtn}</div></td>
 </tr>
-<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td></tr>
+<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${communityLine(COMM_SZ)}${certs}${qr}${legal}</table></td></tr>
 </tbody></table>`;
   }
   if (s.tpl === 'photo-top') {
@@ -419,7 +414,7 @@ async function buildHTML() {
 <td valign="top"><table cellpadding="0" cellspacing="0" border="0">${rows}</table><div style="margin-top:10px;">${viewBtn}</div></td>
 <td valign="top" align="right"><img src="${logoUrl}" width="130" style="width:130px;display:inline-block;" alt="Canablue"><div style="margin-top:10px;">${socials}</div></td>
 </tr></tbody></table></td></tr>
-<tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td></tr>
+<tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%">${communityLine(COMM_SZ)}${certs}${qr}${legal}</table></td></tr>
 <tr><td style="padding-top:12px;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;">&nbsp;</div></td></tr>
 </tbody></table>`;
   }
@@ -434,7 +429,7 @@ async function buildHTML() {
 <div style="margin-top:12px;"><img src="${logoUrl}" width="120" style="width:120px;display:inline-block;" alt="Canablue"></div>
 <div style="margin-top:10px;">${socials}</div></td>
 </tr>
-<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td></tr>
+<tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${communityLine(COMM_SZ)}${certs}${qr}${legal}</table></td></tr>
 </tbody></table>`;
   }
   // Main template.
@@ -497,7 +492,7 @@ function skFlags() {
     qr: !!v.qr,
     listings: !!v.listings && !!String(state.listings || '').trim(),
     booking: !!v.booking && !!String(state.booking || '').trim(),
-    community: !!v.community && !!String(state.community || '').trim(),
+    community: !!v.community,
     align: ['left', 'center', 'right'].includes(state.certsAlign) ? state.certsAlign : 'center'
   };
 }
@@ -505,7 +500,8 @@ function skelFor(tpl, f) {
   const name = dark => skBar(58, dark && 'wh') + skBar(34, dark ? 'whs' : 'sm') + (f.zona ? skBar(72, dark ? 'whs' : 'sm') : '');
   const contacts = () => [84, 62, 72, 55].map(w => `<span class="crow"><i class="cico"></i>${skBar(w)}</span>`).join('');
   const photo = px => f.photo ? skPhoto(px) : '';
-  const pills = (style = '') => `<span class="skrow tight"${style ? ` style="${style}"` : ''}>${f.listings ? skPill(136) : ''}${f.booking ? skPill(122) : ''}${f.community ? skPill(104, 'ghost') : ''}</span>`;
+  const comm = () => f.community ? `<span class="skrow tight" style="justify-content:center;padding-top:1.4cqw"><i class="bar sm" style="width:${q(96)}"></i>${skPill(150, 'ghost')}${skPill(126, 'ghost')}</span>` : '';
+  const pills = (style = '') => `<span class="skrow tight"${style ? ` style="${style}"` : ''}>${f.listings ? skPill(136) : ''}${f.booking ? skPill(122) : ''}</span>`;
   const social = () => f.socials ? `<span class="dots">${'<i></i>'.repeat(f.socials)}</span>` : '';
   const certs = () => f.certs ? `<span class="certs" style="justify-content:${f.align}">${'<i></i>'.repeat(f.certs)}</span>` : '';
   const legal = () => f.legal ? `<span class="lg">${skBar(58, 'sm')}${skBar(40, 'sm')}</span>` : '';
@@ -521,7 +517,7 @@ function skelFor(tpl, f) {
   ${certs()}
   <span class="col colr">${skLogo(130)}${pills()}${social()}</span>
 </span>
-${qr()}${legal()}`;
+${comm()}${qr()}${legal()}`;
   if (tpl === 'moderna') return `
 <span class="band">
   <span class="skrow between">
@@ -534,7 +530,7 @@ ${qr()}${legal()}`;
     <span class="col" style="width:55%">${contacts()}</span>
     <span class="col colr" style="flex:1">${skLogo(125)}${pills()}${social()}</span>
   </span>
-  ${certs()}${qr()}${legal()}
+  ${comm()}${certs()}${qr()}${legal()}
 </span>`;
   if (tpl === 'banner') return `
 <span class="band">
@@ -551,7 +547,7 @@ ${qr()}${legal()}`;
 </span>
 <span class="foot">
   <i class="hline"></i>
-  ${certs()}${qr()}${legal()}
+  ${comm()}${certs()}${qr()}${legal()}
 </span>`;
   if (tpl === 'sidebar') return `
 <span class="side">
@@ -563,7 +559,7 @@ ${qr()}${legal()}`;
   ${contacts()}
   ${pills()}
   ${skLogo(120)}
-  ${certs()}${qr()}${legal()}
+  ${comm()}${certs()}${qr()}${legal()}
 </span>`;
   if (tpl === 'photo-left') return `
 <span class="skrow" style="align-items:flex-start">
@@ -575,7 +571,7 @@ ${qr()}${legal()}`;
     ${pills()}
   </span>
 </span>
-${certs()}${qr()}${legal()}`;
+${comm()}${certs()}${qr()}${legal()}`;
   if (tpl === 'photo-top') return `
 <span class="col colc" style="width:100%">${photo(120)}${name()}</span>
 <i class="hline"></i>
@@ -583,7 +579,7 @@ ${certs()}${qr()}${legal()}`;
   <span class="col" style="flex:1">${contacts()}${pills()}</span>
   <span class="col colr" style="flex:1">${skLogo(130)}${social()}</span>
 </span>
-${certs()}${qr()}${legal()}
+${comm()}${certs()}${qr()}${legal()}
 <i class="hline"></i>`;
   if (tpl === 'photo-right') return `
 <span class="skrow" style="align-items:flex-start">
@@ -595,7 +591,7 @@ ${certs()}${qr()}${legal()}
   </span>
   <span class="col colc" style="width:28.3%">${photo(120)}${skLogo(120)}${social()}</span>
 </span>
-${certs()}${qr()}${legal()}`;
+${comm()}${certs()}${qr()}${legal()}`;
   return `
 <span class="skrow" style="align-items:stretch">
   <span class="col colc" style="width:23%">${photo(118)}</span>
@@ -609,8 +605,7 @@ ${certs()}${qr()}${legal()}`;
   <span class="col colc" style="width:50%"><span class="skrow tight" style="justify-content:center">${f.listings ? skPill(141) : ''}${f.booking ? skPill(122) : ''}</span></span>
   <span class="col colr" style="width:25%">${social()}</span>
 </span>
-${f.community ? `<span class="skrow tight" style="justify-content:center;padding-top:1.4cqw"><i class="bar sm" style="width:${q(104)}"></i>${skPill(166, 'ghost')}${skPill(139, 'ghost')}</span>` : ''}
-${certs()}${qr()}${legal()}`;
+${comm()}${certs()}${qr()}${legal()}`;
 }
 let skKey = '';
 function renderSkels(force) {
@@ -657,7 +652,6 @@ function syncStateFromInputs() {
   state.tel = $('fTel').value; state.email = $('fEmail').value; state.web = $('fWeb').value; state.dir = $('fDir').value; state.dirUrl = $('fDirUrl').value;
   state.listings = $('fListings').value; state.linkedin = $('fLinkedin').value;
   state.booking = $('fBooking').value;
-  state.community = $('fCommunity').value;
   state.instagram = $('fInstagram').value; state.whatsapp = $('fWhatsapp').value;
   state.foto = $('fFoto').value; state.logo = $('fLogo').value;
   state.certs = { crs: $('cCRS').checked, aei: $('cAEI').checked, realtor: $('cRealtor').checked, sr23: $('cSR23').checked, sr24: $('cSR24').checked, lux: $('cLux').checked };
@@ -903,7 +897,7 @@ function collectAgent(key) {
     key, color: $('fColor').value, name: $('fNombre').value, role: $('fCargo').value,
     zona: $('fZona').value, tel: $('fTel').value, email: $('fEmail').value, web: $('fWeb').value,
     dir: $('fDir').value, dirUrl: $('fDirUrl').value, listings: $('fListings').value,
-    booking: $('fBooking').value, community: $('fCommunity').value,
+    booking: $('fBooking').value, community: state.community,
     linkedin: $('fLinkedin').value, instagram: $('fInstagram').value, whatsapp: $('fWhatsapp').value,
     foto: $('fFoto').value, logo: $('fLogo').value,
     extra: [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value })).filter(e => e.url),
@@ -924,9 +918,6 @@ function applyAgent(a) {
   $('fDir').value = a.dir || DIR_DEFAULT; $('fDirUrl').value = a.dirUrl || MAPS_DEFAULT;
   $('fListings').value = a.listings || ''; $('fLinkedin').value = a.linkedin || '';
   $('fBooking').value = a.booking || '';
-  // Legacy records have no community field: fall back to the default, but keep an
-  // explicitly cleared value (empty string) as empty.
-  $('fCommunity').value = a.community === undefined ? COMMUNITY_DEFAULT : a.community;
   $('fInstagram').value = a.instagram || ''; $('fWhatsapp').value = a.whatsapp || '';
   $('fFoto').value = a.foto || ''; if (a.logo) $('fLogo').value = a.logo;
   const ct = a.certs || {};
@@ -1148,7 +1139,7 @@ $('tplGrid').addEventListener('click', e => {
   markDirty();
 });
 document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; markDirty(); });
-['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fBooking','fCommunity','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vBooking','vCommunity','vQr','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', markDirty));
+['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fBooking','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vBooking','vCommunity','vQr','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', markDirty));
 $('fColorHex').addEventListener('change', e => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('fColor').value = e.target.value; markDirty(); });
 $('fFotoFile').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;

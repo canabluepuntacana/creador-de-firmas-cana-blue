@@ -57,7 +57,9 @@ deletes them.
 1. Create a spreadsheet with a tab named `Agentes` and this exact header row:
    `key | name | role | zona | tel | email | web | dir | dirUrl | listings | booking | community | linkedin | instagram | whatsapp | foto | logo | color | tpl | iconStyle | certsAlign | qr | crs | aei | realtor | sr23 | sr24 | lux`
    Cert columns and `qr` use `TRUE` / `FALSE`; `iconStyle` is `solid`, `rounded`, `outline`, `frame`, `line` or `soft`; `certsAlign` is `left`, `center` or `right`; `tpl` is the template key (`principal`, `broker`, `moderna`, `banner`, `sidebar`, `photo-left`, `photo-top`, `photo-right`).
-   Leave `booking` empty to hide the "Schedule a Call" button, and `community` empty to hide the "Community" button.
+   Leave `booking` empty to hide the "Schedule a Call" button. The `community` column is
+   kept for backwards compatibility but no longer drives the signature: the
+   "Community Expert:" links are fixed for every agent.
 2. Share → General access → **Anyone with the link** (Viewer).
 3. Copy the spreadsheet ID from its URL (`/d/ID/edit`) and paste it in the
    creator's **Google Sheet ID** field → **Reload**. The ID is remembered.
@@ -68,21 +70,23 @@ deletes them.
 
 - **View My Listings** — pill button, uses the `listings` URL. Toggle in **Display**.
 - **Schedule a Call** — pill button, appears only when the `booking` URL is set. Toggle in **Display**.
-- **Community** — in the seven compact templates it is a secondary pill button (white
-  background, brand border and brand text) that uses the `community` URL
-  (`https://canablue.com/community/cocotal/` by default, editable per agent). Toggle in **Display**.
+- **Community Expert** — every template prints a **Community Expert:** label in bold
+  followed by one small outline pill per community page: `Palma Real Villas (Cocotal)` →
+  `https://canablue.com/community/cocotal/` and `Los Corales, Cortecito` →
+  `https://canablue.com/community/el-cortecito/` (`COMMUNITY_LINKS` in `app.js`, fixed for
+  all agents). Toggle **Show community links** in **Display**.
 - In the **Main** template the bottom area has two variants: on desktop the actions sit
   in the centre of the logo row (logo on the left, social icons on the right); on a
   phone they drop to their own centred line under the logo. The signature carries a
   small media query that swaps them below 480 px.
 - In **Main** the action line holds only **View My Listings** (centred, also on the
-  phone) and an optional **Schedule a Call**. The community action is no longer a pill
-  on that line: a second line reads **Community Expert:** followed by one smaller
-  outline pill per community page — `Palma Real Villas (Cocotal)` →
-  `https://canablue.com/community/cocotal/` and `Los Corales, Cortecito` →
-  `https://canablue.com/community/el-cortecito/` (`COMMUNITY_LINKS` in `app.js`). On
-  desktop the label and both pills share one centred line; on a phone the label sits
-  above the two centred pills. The same **Show community links** toggle hides it.
+  phone) and an optional **Schedule a Call**. The community block sits on its own line
+  below it: on desktop the bold label and both pills share one centred line; on a phone
+  the label sits above the two centred pills.
+- In the seven compact templates the community block is appended as a centred row under
+  the content (above certifications); **Dark Sidebar** stacks the label above the pills
+  because its right column is narrower. Sizes: label 13 px bold in Main, 11.5 px bold in
+  the compact templates, pills 10.5 px and 9 px respectively.
 - The **Main** template runs one notch larger than the rest (`MAIN_SZ` in `app.js`):
   photo 118 px, name 18.5 px, role 13 px, contacts 12.5 px with 17 px icons, logo
   140 px, 12 px buttons and ~27 px social icons. It still fits the 600 px row, and each
