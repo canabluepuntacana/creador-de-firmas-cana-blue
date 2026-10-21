@@ -98,6 +98,10 @@ deletes them.
   140 px, 12 px buttons and ~27 px social icons. It still fits the 600 px row, and each
   of the eight templates otherwise keeps its own sizes — the shared helpers take an
   optional size argument whose defaults are the original values.
+- The **Main** desktop layout keeps the full name on a single line (`.cb-name` carries
+  `white-space:nowrap` inline and the table gives the name cell the width it needs, so
+  the contacts column is the one that adapts). Below 480 px the media query turns the
+  wrap back on so the name still breaks inside the narrow phone row.
 - **Contact QR (vCard)** — encodes the agent's vCard (name, title, phone, email, site,
   address) so a scan saves the contact. It ships as an embedded PNG, no image host needed.
   Off by default; enable it in **Display**. **Download contact (.vcf)** exports the same

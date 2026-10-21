@@ -327,7 +327,7 @@ async function buildHTML() {
 
   // The Main template runs one notch larger: its 600 px row has room to breathe.
   const MAIN_SZ = {
-    photo: 118, photoCell: 138,
+    photo: 118, photoCell: 132,
     name: 18.5, nameLh: 24, role: 13,
     zona: { fs: 12, lh: 16.5, mw: 200, mt: 6 },
     contact: { ic: 17, fs: 12.5, lh: 18 },
@@ -441,11 +441,11 @@ async function buildHTML() {
   // their own centred line under the logo. The <style> block swaps them below
   // 480 px. Outlook desktop ignores media queries and keeps the desktop row —
   // the mobile rows are hidden inline, so they never show up twice.
-  return `<style>@media only screen and (max-width:480px){.cb-desk{display:none !important}.cb-mob{display:table-row !important}}</style><table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
+  return `<style>@media only screen and (max-width:480px){.cb-desk{display:none !important}.cb-mob{display:table-row !important}.cb-name{white-space:normal !important}}</style><table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
 <tr><td><table cellpadding="0" cellspacing="0" border="0"><tbody><tr>
 <td width="${MAIN_SZ.photoCell}" valign="middle">${fotoCell(MAIN_SZ.photo)}</td>
-<td valign="middle"><div style="font-size:${MAIN_SZ.name}px;font-weight:700;color:#111;line-height:${MAIN_SZ.nameLh}px;">${s.nombre}</div><div style="font-size:${MAIN_SZ.role}px;color:#111;">${s.cargo}</div>${zonaHtml(MAIN_SZ.zona)}</td>
-<td width="24"></td><td width="1" style="border-left:1px solid ${c};font-size:0;">&nbsp;</td><td width="24"></td>
+<td valign="middle"><div class="cb-name" style="font-size:${MAIN_SZ.name}px;font-weight:700;color:#111;line-height:${MAIN_SZ.nameLh}px;white-space:nowrap;">${s.nombre}</div><div style="font-size:${MAIN_SZ.role}px;color:#111;">${s.cargo}</div>${zonaHtml(MAIN_SZ.zona)}</td>
+<td width="20"></td><td width="1" style="border-left:1px solid ${c};font-size:0;">&nbsp;</td><td width="20"></td>
 <td valign="middle"><table cellpadding="0" cellspacing="0" border="0">${contactRows(MAIN_SZ.contact)}</table></td>
 </tr></tbody></table></td></tr>
 <tr><td style="padding:14px 0 0;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;max-width:100%;">&nbsp;</div></td></tr>
