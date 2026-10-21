@@ -221,7 +221,9 @@ function zonaText(zona, sz, label) {
   const o = sz || {};
   const pre = label === undefined ? 'Specializing in' : String(label).trim();
   const body = String(zona).replace(/\r?\n/g, '<br>');
-  return `<div style="max-width:${o.mw || 190}px;margin-top:${o.mt || 5}px;font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 11.5}px;color:#5b6b84;line-height:${o.lh || 16}px;">${pre ? pre + ' ' : ''}${body}</div>`;
+  // The intro always gets its own line; the area starts on the next one.
+  const head = pre ? pre + '<br>' : '';
+  return `<div style="max-width:${o.mw || 190}px;margin-top:${o.mt || 5}px;font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 11.5}px;color:#5b6b84;line-height:${o.lh || 16}px;">${head}${body}</div>`;
 }
 // Logos only, no heading label
 const CERT_DEFS = [
@@ -388,7 +390,7 @@ async function buildHTML() {
   }
   if (s.tpl === 'sidebar') {
     const sidePhoto = s.vis.foto ? `<img src="${s.foto}" width="88" height="88" style="width:88px;height:88px;border-radius:50%;object-fit:cover;display:inline-block;border:3px solid #ffffff;" alt="${s.nombre}">` : '';
-    const sideZona = (s.vis.zona && s.zona) ? `<div style="margin-top:6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#d7e1f2;line-height:15px;">${String(s.zonaLabel || '').trim() ? String(s.zonaLabel).trim() + ' ' : ''}${String(s.zona).replace(/\r?\n/g, '<br>')}</div>` : '';
+    const sideZona = (s.vis.zona && s.zona) ? `<div style="margin-top:6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#d7e1f2;line-height:15px;">${String(s.zonaLabel || '').trim() ? String(s.zonaLabel).trim() + '<br>' : ''}${String(s.zona).replace(/\r?\n/g, '<br>')}</div>` : '';
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody><tr>
 <td width="190" valign="top" align="center" style="background-color:${c};border-radius:10px 0 0 10px;padding:24px 16px;">${sidePhoto}
 <div style="color:#ffffff;font-size:16px;font-weight:bold;margin-top:12px;line-height:20px;">${s.nombre}</div>

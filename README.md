@@ -74,9 +74,9 @@ deletes them.
 - **Area of expertise** — the **Area of expertise** field is a text area: press **Enter**
   to start a second line and it prints as a real line break in Main, Broker, Dark
   Sidebar and Photo Left/Top/Right (Compact and Banner print the area inline after the
-  role, so there a break becomes ` · `). It prints after the **Text before the area**
-  field (default "Specializing in"), so the whole line is editable: change the wording,
-  translate it or leave the intro empty to show just the area.
+  role, so there a break becomes ` · `). The **Text before the area** field
+  (default "Specializing in") prints on its own line, with the area underneath; change
+  the wording, translate it or leave it empty to show just the area.
 - **Schedule a Call** — pill button, appears only when the `booking` URL is set. Toggle in **Display**.
 - **Community Expert** — every template prints a **Community Expert:** label in bold
   followed by one small outline pill per community page: `Palma Real Villas (Cocotal)` →
