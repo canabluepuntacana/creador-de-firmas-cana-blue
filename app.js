@@ -61,20 +61,21 @@ function normUrl(u) {
 // Extra-link button in 3 shapes: circle (solid) / square (solid) / outline (line only, no fill)
 // Global social icon style (solid / rounded / outline / frame / line / soft),
 // always in official brand colors. Glyphs are thick official-style line logos.
-function socialIcon(url, key, style, c) {
+function socialIcon(url, key, style, c, k) {
   const n = NETWORKS[key] || NETWORKS.website;
   const bg = key === 'website' ? c : (n.bg || c);
   const hex = bg.charAt(0) === '#' ? bg.slice(1) : bg;
+  const kk = k || 1;
   const box = 'display:inline-block;text-align:center;vertical-align:middle;';
   const im = (src, s, mt) => `<img src="${src}" width="${s}" height="${s}" alt="${n.label}" style="display:inline-block;width:${s}px;height:${s}px;margin-top:${mt}px;border:0;">`;
-  if (style === 'rounded') return `<a href="${url}" target="_blank" style="${box}width:24px;height:24px;border-radius:8px;background-color:${bg};">${im(n.img, 13, 5)}</a>`;
-  if (style === 'outline') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:50%;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), 16, 4)}</a>`;
-  if (style === 'frame') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:8px;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), 16, 4)}</a>`;
-  if (style === 'line') return `<a href="${url}" target="_blank" style="${box}">${im(networkGlyph(n, hex), 24, 0)}</a>`;
-  if (style === 'soft') return `<a href="${url}" target="_blank" style="${box}width:26px;height:26px;border-radius:50%;background-color:${hexA(bg, .14)};">${im(networkGlyph(n, hex), 16, 4)}</a>`;
-  return socialBtn(url, bg, n.img, n.label);
+  if (style === 'rounded') return `<a href="${url}" target="_blank" style="${box}width:${Math.round(24 * kk)}px;height:${Math.round(24 * kk)}px;border-radius:${Math.round(8 * kk)}px;background-color:${bg};">${im(n.img, Math.round(13 * kk), Math.round(5 * kk))}</a>`;
+  if (style === 'outline') return `<a href="${url}" target="_blank" style="${box}width:${Math.round(26 * kk)}px;height:${Math.round(26 * kk)}px;border-radius:50%;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), Math.round(16 * kk), Math.round(4 * kk))}</a>`;
+  if (style === 'frame') return `<a href="${url}" target="_blank" style="${box}width:${Math.round(26 * kk)}px;height:${Math.round(26 * kk)}px;border-radius:${Math.round(8 * kk)}px;border:1px solid ${bg};background-color:transparent;">${im(networkGlyph(n, hex), Math.round(16 * kk), Math.round(4 * kk))}</a>`;
+  if (style === 'line') return `<a href="${url}" target="_blank" style="${box}">${im(networkGlyph(n, hex), Math.round(24 * kk), 0)}</a>`;
+  if (style === 'soft') return `<a href="${url}" target="_blank" style="${box}width:${Math.round(26 * kk)}px;height:${Math.round(26 * kk)}px;border-radius:50%;background-color:${hexA(bg, .14)};">${im(networkGlyph(n, hex), Math.round(16 * kk), Math.round(4 * kk))}</a>`;
+  return socialBtn(url, bg, n.img, n.label, kk);
 }
-function extraBtn(e, c, style) { return socialIcon(e.url, e.icon, style || 'solid', c); }
+function extraBtn(e, c, style, k) { return socialIcon(e.url, e.icon, style || 'solid', c, k); }
 // Fixed official certification artwork (uploaed to Cloudinary)
 const CERT_IMG = {
   crs: 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792088258/cert-CRS.png',
@@ -164,41 +165,50 @@ function qrDataURL(text, size) {
     return d;
   } catch { return ''; }
 }
-function qrRow(data, align) {
+function qrRow(data, align, h) {
   const src = qrDataURL(data, 280);
   if (!src) return '';
+  const size = h || 92;
+  const fs = size > 92 ? 12 : 11;
+  const lh = size > 92 ? 16 : 15;
   return `<tr><td align="${align || 'center'}" style="padding-top:12px;"><table cellpadding="0" cellspacing="0" border="0" style="display:inline-block;"><tbody><tr>
-<td valign="middle" style="padding-right:10px;"><img src="${src}" width="92" height="92" alt="Scan to save my contact" style="display:block;width:92px;height:92px;border:0;"></td>
-<td valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:15px;color:#5b6b84;text-align:left;">Scan to save<br>my contact</td>
+<td valign="middle" style="padding-right:10px;"><img src="${src}" width="${size}" height="${size}" alt="Scan to save my contact" style="display:block;width:${size}px;height:${size}px;border:0;"></td>
+<td valign="middle" style="font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;line-height:${lh}px;color:#5b6b84;text-align:left;">Scan to save<br>my contact</td>
 </tr></tbody></table></td></tr>`;
 }
 
-function contactRow(iconUrl, contentHtml, alt) {
-  return `<tr><td width="22" style="vertical-align:middle;padding:3px 0;"><img src="${iconUrl}" width="15" height="15" style="display:block;width:15px;height:15px;" alt="${alt || ''}"></td><td style="vertical-align:middle;font-size:12px;line-height:17px;color:#222222;font-family:Arial,Helvetica,sans-serif;">${contentHtml}</td></tr>`;
+function contactRow(iconUrl, contentHtml, alt, sz) {
+  const o = sz || {};
+  const ic = o.ic || 15, fs = o.fs || 12, lh = o.lh || 17;
+  return `<tr><td width="${ic + 7}" style="vertical-align:middle;padding:3px 0;"><img src="${iconUrl}" width="${ic}" height="${ic}" style="display:block;width:${ic}px;height:${ic}px;" alt="${alt || ''}"></td><td style="vertical-align:middle;font-size:${fs}px;line-height:${lh}px;color:#222222;font-family:Arial,Helvetica,sans-serif;">${contentHtml}</td></tr>`;
 }
-function socialBtn(href, bg, iconUrl, alt) {
-  return `<a href="${href}" target="_blank" style="display:inline-block;width:24px;height:24px;border-radius:50%;background-color:${bg};text-align:center;vertical-align:middle;"><img src="${iconUrl}" width="13" height="13" alt="${alt}" style="display:inline-block;width:13px;height:13px;margin-top:5px;border:0;"></a>`;
+function socialBtn(href, bg, iconUrl, alt, k) {
+  const kk = k || 1, box = Math.round(24 * kk), gly = Math.round(13 * kk), mt = Math.round(5 * kk);
+  return `<a href="${href}" target="_blank" style="display:inline-block;width:${box}px;height:${box}px;border-radius:50%;background-color:${bg};text-align:center;vertical-align:middle;"><img src="${iconUrl}" width="${gly}" height="${gly}" alt="${alt}" style="display:inline-block;width:${gly}px;height:${gly}px;margin-top:${mt}px;border:0;"></a>`;
 }
 // Pill buttons (compact). Filled ones use the brand color; the "Community" button is
 // the secondary action: white background, brand border and brand text.
-function pillBtn(href, label, glyph, c, variant) {
+function pillBtn(href, label, glyph, c, variant, opt) {
   if (!href) return '';
-  const base = 'display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;text-decoration:none;border-radius:16px;padding:6px 12px;white-space:nowrap;';
-  const img = `<img src="${glyph}" width="12" height="12" alt="" style="display:inline-block;width:12px;height:12px;vertical-align:-2px;border:0;">&nbsp;${label}`;
+  const o = opt || {};
+  const fs = o.fs || 11, pad = o.pad || '6px 12px', rad = o.rad || 16, gs = o.gs || 12;
+  const base = `display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;font-weight:bold;text-decoration:none;border-radius:${rad}px;padding:${pad};white-space:nowrap;`;
+  const img = `<img src="${glyph}" width="${gs}" height="${gs}" alt="" style="display:inline-block;width:${gs}px;height:${gs}px;vertical-align:-${Math.max(1, Math.round(gs / 6))}px;border:0;">&nbsp;${label}`;
   if (variant === 'outline') {
     return `<a href="${href}" target="_blank" style="${base}background-color:#ffffff;color:${c};border:1px solid ${c};">${img}</a>`;
   }
   return `<a href="${href}" target="_blank" style="${base}background-color:${c};color:#ffffff;">${img}</a>`;
 }
 // Pill button with modern home icon, placed next to the Canablue logo
-function viewPropsBtn(listings, c) { return pillBtn(listings, 'View My Listings', whiteGlyph('home'), c); }
+function viewPropsBtn(listings, c, opt) { return pillBtn(listings, 'View My Listings', whiteGlyph('home'), c, 'filled', opt); }
 // Optional second pill: booking / agenda link (Calendly, etc.)
-function scheduleBtn(url, c) { return pillBtn(url, 'Schedule a Call', whiteGlyph('calendar'), c); }
+function scheduleBtn(url, c, opt) { return pillBtn(url, 'Schedule a Call', whiteGlyph('calendar'), c, 'filled', opt); }
 // Optional third pill: Canablue community (white with brand border and brand text)
-function communityBtn(url, c) { return pillBtn(url, 'Community', IMG('ios-filled', 50, c.replace('#', ''), 'friends'), c, 'outline'); }
+function communityBtn(url, c, opt) { return pillBtn(url, 'Community', IMG('ios-filled', 50, c.replace('#', ''), 'friends'), c, 'outline', opt); }
 // Plain clean text, no pill background or border
-function zonaText(zona) {
-  return `<div style="max-width:190px;margin-top:5px;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;color:#5b6b84;line-height:16px;">Specializing in ${zona}</div>`;
+function zonaText(zona, sz) {
+  const o = sz || {};
+  return `<div style="max-width:${o.mw || 190}px;margin-top:${o.mt || 5}px;font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 11.5}px;color:#5b6b84;line-height:${o.lh || 16}px;">Specializing in ${zona}</div>`;
 }
 // Logos only, no heading label
 const CERT_DEFS = [
@@ -215,9 +225,9 @@ function certImgs(certs, links, customs, h) {
   (customs || []).filter(x => x.img).forEach(x => out.push(certImgTag(x.img, 'Certification', x.link, h)));
   return out;
 }
-function certsRow(certs, links, customs, vis, align) {
+function certsRow(certs, links, customs, vis, align, h) {
   if (!vis.certs) return '';
-  const imgs = certImgs(certs, links, customs, 26);
+  const imgs = certImgs(certs, links, customs, h || 26);
   if (!imgs.length) return '';
   return `<tr><td align="${align || 'center'}" style="padding-top:12px;"><div>${imgs.join(' ')}</div></td></tr>`;
 }
@@ -247,38 +257,59 @@ async function buildHTML() {
     ? `<div style="text-align:center;"><img src="${s.foto}" width="${size}" height="${size}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;display:inline-block;border:3px solid ${c}22;" alt="${s.nombre}"></div>` : '';
 
   // Contact rows: phone / email / web / address only (no listings row, no LinkedIn text row)
-  const rows =
-    contactRow(lineIcon('phone', c), `<a href="${telHref}" style="color:#222;text-decoration:none;">${s.tel}</a>`, 'Phone') +
-    contactRow(lineIcon('new-post', c), `<a href="mailto:${s.email}" style="color:#222;text-decoration:none;">${s.email}</a>`, 'Email') +
-    contactRow(lineIcon('domain', c), `<a href="${webHref}" style="color:#222;text-decoration:none;">${s.web}</a>`, 'Website') +
-    contactRow(lineIcon('marker', c), s.dirUrl ? `<a href="${s.dirUrl}" target="_blank" style="color:#222;text-decoration:none;">${s.dir}</a>` : `<span>${s.dir}</span>`, 'Address');
+  const contactRows = (sz) =>
+    contactRow(lineIcon('phone', c), `<a href="${telHref}" style="color:#222;text-decoration:none;">${s.tel}</a>`, 'Phone', sz) +
+    contactRow(lineIcon('new-post', c), `<a href="mailto:${s.email}" style="color:#222;text-decoration:none;">${s.email}</a>`, 'Email', sz) +
+    contactRow(lineIcon('domain', c), `<a href="${webHref}" style="color:#222;text-decoration:none;">${s.web}</a>`, 'Website', sz) +
+    contactRow(lineIcon('marker', c), s.dirUrl ? `<a href="${s.dirUrl}" target="_blank" style="color:#222;text-decoration:none;">${s.dir}</a>` : `<span>${s.dir}</span>`, 'Address', sz);
+  const rows = contactRows();
 
   // Social circles only: Instagram (outline glyph) / WhatsApp (flat) / LinkedIn.
   const ist = s.iconStyle || 'solid';
   const cal = ['left', 'center', 'right'].includes(s.certsAlign) ? s.certsAlign : 'center';
   // Only networks that actually have a URL are rendered — an empty link must not
   // leave a dangling icon in the signature.
-  let socialParts = [
-    ['instagram', s.instagram], ['whatsapp', s.whatsapp], ['linkedin', s.linkedin]
-  ].filter(([, u]) => String(u || '').trim())
-    .map(([k, u]) => socialIcon(String(u).trim(), k, ist, c));
-  if (s.extra.length) {
-    socialParts = socialParts.concat(s.extra.filter(e => String(e.url || '').trim()).map(e => extraBtn(e, c, ist)));
-  }
-  const socials = (!s.vis.social || !socialParts.length) ? '' : socialParts.join(' ');
+  const socialsHtml = (k) => {
+    let parts = [
+      ['instagram', s.instagram], ['whatsapp', s.whatsapp], ['linkedin', s.linkedin]
+    ].filter(([, u]) => String(u || '').trim())
+      .map(([k2, u]) => socialIcon(String(u).trim(), k2, ist, c, k));
+    if (s.extra.length) {
+      parts = parts.concat(s.extra.filter(e => String(e.url || '').trim()).map(e => extraBtn(e, c, ist, k)));
+    }
+    return (!s.vis.social || !parts.length) ? '' : parts.join(' ');
+  };
+  const socials = socialsHtml();
 
-  const legal = s.vis.legal
-    ? `<tr><td style="padding-top:12px;font-size:10px;line-height:14px;color:#8a94a8;text-align:center;font-family:Arial,Helvetica,sans-serif;max-width:560px;">${s.legal}</td></tr>` : '';
+  const legalHtml = (sz) => s.vis.legal
+    ? `<tr><td style="padding-top:12px;font-size:${(sz && sz.fs) || 10}px;line-height:${(sz && sz.lh) || 14}px;color:#8a94a8;text-align:center;font-family:Arial,Helvetica,sans-serif;max-width:560px;">${s.legal}</td></tr>` : '';
+  const legal = legalHtml();
   // Both pills are optional and disappear when the toggle is off or the URL is empty.
-  const pills = [];
-  if (s.vis.listings && s.listings) pills.push(viewPropsBtn(s.listings, c));
-  if (s.vis.booking && s.booking) pills.push(scheduleBtn(s.booking, c));
-  if (s.vis.community && s.community) pills.push(communityBtn(s.community, c));
-  const viewBtn = pills.join('&nbsp;');
+  const pillsHtml = (opt) => {
+    const pills = [];
+    if (s.vis.listings && s.listings) pills.push(viewPropsBtn(s.listings, c, opt));
+    if (s.vis.booking && s.booking) pills.push(scheduleBtn(s.booking, c, opt));
+    if (s.vis.community && s.community) pills.push(communityBtn(s.community, c, opt));
+    return pills.join('&nbsp;');
+  };
+  const viewBtn = pillsHtml();
 
   const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign);
   const qr = (s.vis.qr && raw) ? qrRow(vcardText(raw), cal) : '';
-  const zona = (s.vis.zona && s.zona) ? zonaText(s.zona) : '';
+  const zonaHtml = (sz) => (s.vis.zona && s.zona) ? zonaText(s.zona, sz) : '';
+  const zona = zonaHtml();
+
+  // The Main template runs one notch larger: its 600 px row has room to breathe.
+  const MAIN_SZ = {
+    photo: 118, photoCell: 138,
+    name: 18.5, nameLh: 24, role: 13,
+    zona: { fs: 12, lh: 16.5, mw: 200, mt: 6 },
+    contact: { ic: 17, fs: 12.5, lh: 18 },
+    logo: 140,
+    pill: { fs: 12, pad: '7px 14px', rad: 17, gs: 13 },
+    socialK: 1.12, certH: 29, qrH: 104,
+    legal: { fs: 10.5, lh: 15 }
+  };
 
   if (s.tpl === 'broker') {
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
@@ -381,21 +412,21 @@ async function buildHTML() {
   // the mobile rows are hidden inline, so they never show up twice.
   return `<style>@media only screen and (max-width:480px){.cb-desk{display:none !important}.cb-mob{display:table-row !important}}</style><table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
 <tr><td><table cellpadding="0" cellspacing="0" border="0"><tbody><tr>
-<td width="130" valign="middle">${fotoCell(105)}</td>
-<td valign="middle"><div style="font-size:17px;font-weight:700;color:#111;line-height:22px;">${s.nombre}</div><div style="font-size:12px;color:#111;">${s.cargo}</div>${zona}</td>
+<td width="${MAIN_SZ.photoCell}" valign="middle">${fotoCell(MAIN_SZ.photo)}</td>
+<td valign="middle"><div style="font-size:${MAIN_SZ.name}px;font-weight:700;color:#111;line-height:${MAIN_SZ.nameLh}px;">${s.nombre}</div><div style="font-size:${MAIN_SZ.role}px;color:#111;">${s.cargo}</div>${zonaHtml(MAIN_SZ.zona)}</td>
 <td width="24"></td><td width="1" style="border-left:1px solid ${c};font-size:0;">&nbsp;</td><td width="24"></td>
-<td valign="middle"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
+<td valign="middle"><table cellpadding="0" cellspacing="0" border="0">${contactRows(MAIN_SZ.contact)}</table></td>
 </tr></tbody></table></td></tr>
 <tr><td style="padding:14px 0 0;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;max-width:100%;">&nbsp;</div></td></tr>
 <tr class="cb-desk"><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
-<td width="25%" valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td>
-<td width="50%" align="center" valign="middle" style="min-width:96px;">${viewBtn}</td>
-<td width="25%" align="right" valign="middle" style="min-width:96px;">${socials}</td></tr></tbody></table></td></tr>
+<td width="25%" valign="middle"><img src="${logoUrl}" width="${MAIN_SZ.logo}" style="width:${MAIN_SZ.logo}px;max-width:${MAIN_SZ.logo}px;display:block;" alt="Canablue"></td>
+<td width="50%" align="center" valign="middle" style="min-width:96px;">${pillsHtml(MAIN_SZ.pill)}</td>
+<td width="25%" align="right" valign="middle" style="min-width:96px;">${socialsHtml(MAIN_SZ.socialK)}</td></tr></tbody></table></td></tr>
 <tr class="cb-mob" style="display:none;"><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
-<td width="76%" valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td>
-<td width="24%" align="right" valign="middle" style="min-width:96px;">${socials}</td></tr></tbody></table></td></tr>
-<tr class="cb-mob" style="display:none;"><td align="center" style="padding-top:14px;">${viewBtn}</td></tr>
-${certs}${qr}${legal}</tbody></table>`;
+<td width="68%" valign="middle"><img src="${logoUrl}" width="${MAIN_SZ.logo}" style="width:${MAIN_SZ.logo}px;max-width:${MAIN_SZ.logo}px;display:block;" alt="Canablue"></td>
+<td width="32%" align="right" valign="middle" style="min-width:96px;">${socialsHtml(MAIN_SZ.socialK)}</td></tr></tbody></table></td></tr>
+<tr class="cb-mob" style="display:none;"><td align="center" style="padding-top:14px;">${pillsHtml(MAIN_SZ.pill)}</td></tr>
+${certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign, MAIN_SZ.certH)}${(s.vis.qr && raw) ? qrRow(vcardText(raw), cal, MAIN_SZ.qrH) : ''}${legalHtml(MAIN_SZ.legal)}</tbody></table>`;
 }
 
 // ---- Template thumbnails ----------------------------------------------------------
@@ -532,14 +563,14 @@ ${certs()}${qr()}${legal()}
 ${certs()}${qr()}${legal()}`;
   return `
 <span class="skrow" style="align-items:stretch">
-  <span class="col colc" style="width:21.7%">${photo(105)}</span>
+  <span class="col colc" style="width:23%">${photo(118)}</span>
   <span class="col" style="flex:1">${name()}</span>
   <i class="vline"></i>
-  <span class="col" style="width:34%">${contacts()}</span>
+  <span class="col" style="width:32%">${contacts()}</span>
 </span>
 <i class="hline"></i>
 <span class="skrow">
-  <span class="col" style="width:25%">${skLogo(128)}</span>
+  <span class="col" style="width:25%">${skLogo(140)}</span>
   <span class="col colc" style="width:50%">${pills('justify-content:center')}</span>
   <span class="col colr" style="width:25%">${social()}</span>
 </span>

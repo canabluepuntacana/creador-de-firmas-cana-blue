@@ -75,6 +75,11 @@ deletes them.
   in the centre of the logo row (logo on the left, social icons on the right); on a
   phone they drop to their own centred line under the logo. The signature carries a
   small media query that swaps them below 480 px.
+- The **Main** template runs one notch larger than the rest (`MAIN_SZ` in `app.js`):
+  photo 118 px, name 18.5 px, role 13 px, contacts 12.5 px with 17 px icons, logo
+  140 px, 12 px buttons and ~27 px social icons. It still fits the 600 px row, and each
+  of the eight templates otherwise keeps its own sizes — the shared helpers take an
+  optional size argument whose defaults are the original values.
 - **Contact QR (vCard)** — encodes the agent's vCard (name, title, phone, email, site,
   address) so a scan saves the contact. It ships as an embedded PNG, no image host needed.
   Off by default; enable it in **Display**. **Download contact (.vcf)** exports the same
