@@ -11,6 +11,7 @@ const state = {
   tpl: 'principal',
   color: '#174176',
   nombre: 'Pamela Núñez', cargo: 'Broker Owner', zona: 'Punta Cana · Cap Cana',
+  zonaLabel: 'Specializing in',
   tel: '+1 (809) 975-3900', email: 'pamela@canablue.com', web: 'canablue.com',
   dir: 'Local P104, Plaza San Juan Shopping Center, Bávaro, Punta Cana',
   dirUrl: 'https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111',
@@ -215,9 +216,10 @@ function communityPill(label, url, c, opt) {
   return `<a href="${url}" target="_blank" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;font-weight:bold;text-decoration:none;border-radius:${rad}px;padding:${pad};white-space:nowrap;background-color:#ffffff;color:${c};border:1px solid ${c};">${label}</a>`;
 }
 // Plain clean text, no pill background or border
-function zonaText(zona, sz) {
+function zonaText(zona, sz, label) {
   const o = sz || {};
-  return `<div style="max-width:${o.mw || 190}px;margin-top:${o.mt || 5}px;font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 11.5}px;color:#5b6b84;line-height:${o.lh || 16}px;">Specializing in ${zona}</div>`;
+  const pre = label === undefined ? 'Specializing in' : String(label).trim();
+  return `<div style="max-width:${o.mw || 190}px;margin-top:${o.mt || 5}px;font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 11.5}px;color:#5b6b84;line-height:${o.lh || 16}px;">${pre ? pre + ' ' : ''}${zona}</div>`;
 }
 // Logos only, no heading label
 const CERT_DEFS = [
@@ -249,6 +251,7 @@ async function buildHTML() {
   const s = {
     ...raw,
     nombre: esc(raw.nombre), cargo: esc(raw.cargo), zona: esc(raw.zona),
+    zonaLabel: esc(raw.zonaLabel === undefined ? 'Specializing in' : raw.zonaLabel),
     tel: esc(raw.tel), email: esc(raw.email), web: esc(raw.web),
     dir: esc(raw.dir), legal: esc(raw.legal),
     dirUrl: normUrl(raw.dirUrl), listings: normUrl(raw.listings), booking: normUrl(raw.booking),
@@ -319,7 +322,7 @@ async function buildHTML() {
 
   const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign);
   const qr = (s.vis.qr && raw) ? qrRow(vcardText(raw), cal) : '';
-  const zonaHtml = (sz) => (s.vis.zona && s.zona) ? zonaText(s.zona, sz) : '';
+  const zonaHtml = (sz) => (s.vis.zona && s.zona) ? zonaText(s.zona, sz, s.zonaLabel) : '';
   const zona = zonaHtml();
 
   // The Main template runs one notch larger: its 600 px row has room to breathe.
@@ -378,7 +381,7 @@ async function buildHTML() {
   }
   if (s.tpl === 'sidebar') {
     const sidePhoto = s.vis.foto ? `<img src="${s.foto}" width="88" height="88" style="width:88px;height:88px;border-radius:50%;object-fit:cover;display:inline-block;border:3px solid #ffffff;" alt="${s.nombre}">` : '';
-    const sideZona = (s.vis.zona && s.zona) ? `<div style="margin-top:6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#d7e1f2;line-height:15px;">Specializing in ${s.zona}</div>` : '';
+    const sideZona = (s.vis.zona && s.zona) ? `<div style="margin-top:6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#d7e1f2;line-height:15px;">${String(s.zonaLabel || '').trim() ? String(s.zonaLabel).trim() + ' ' : ''}${s.zona}</div>` : '';
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody><tr>
 <td width="190" valign="top" align="center" style="background-color:${c};border-radius:10px 0 0 10px;padding:24px 16px;">${sidePhoto}
 <div style="color:#ffffff;font-size:16px;font-weight:bold;margin-top:12px;line-height:20px;">${s.nombre}</div>
@@ -649,6 +652,7 @@ function markDirty() { setDirty(true); render(); }
 function syncStateFromInputs() {
   state.color = $('fColor').value || '#174176'; $('fColorHex').value = state.color.toUpperCase();
   state.nombre = $('fNombre').value; state.cargo = $('fCargo').value; state.zona = $('fZona').value;
+  state.zonaLabel = $('fZonaLabel').value;
   state.tel = $('fTel').value; state.email = $('fEmail').value; state.web = $('fWeb').value; state.dir = $('fDir').value; state.dirUrl = $('fDirUrl').value;
   state.listings = $('fListings').value; state.linkedin = $('fLinkedin').value;
   state.booking = $('fBooking').value;
@@ -807,7 +811,7 @@ let JSON_AGENTS = [];
 const LOGO_DEFAULT = 'https://res.cloudinary.com/ybkuwivn/image/upload/v1792071937/10._logo-blue-google.png';
 function blankAgent() {
   return {
-    key: '', color: '#174176', name: '', role: '', zona: '', tel: '', email: '',
+    key: '', color: '#174176', name: '', role: '', zona: '', zonaLabel: 'Specializing in', tel: '', email: '',
     web: 'canablue.com', dir: DIR_DEFAULT, dirUrl: MAPS_DEFAULT,
     listings: '', booking: '', community: COMMUNITY_DEFAULT, linkedin: '', instagram: '', whatsapp: '',
     foto: '', logo: LOGO_DEFAULT,
@@ -846,6 +850,8 @@ async function loadSheetAgents(id) {
     return {
       key: String(o.key || '').trim() || slug(o.name),
       color: o.color || '', name: o.name || '', role: o.role || '', zona: o.zona || '',
+      // Optional: "Specializing in" (or any intro) before the area. Omitted = default.
+      zonaLabel: o.zonaLabel || o.zonalabel || undefined,
       tel: o.tel || '', email: o.email || '', web: o.web || 'canablue.com',
       dir: o.dir || DIR_DEFAULT, dirUrl: o.dirUrl || MAPS_DEFAULT,
       listings: o.listings || '', linkedin: o.linkedin || '',
@@ -895,7 +901,7 @@ async function loadAgents() {
 function collectAgent(key) {
   return {
     key, color: $('fColor').value, name: $('fNombre').value, role: $('fCargo').value,
-    zona: $('fZona').value, tel: $('fTel').value, email: $('fEmail').value, web: $('fWeb').value,
+    zona: $('fZona').value, zonaLabel: $('fZonaLabel').value, tel: $('fTel').value, email: $('fEmail').value, web: $('fWeb').value,
     dir: $('fDir').value, dirUrl: $('fDirUrl').value, listings: $('fListings').value,
     booking: $('fBooking').value, community: state.community,
     linkedin: $('fLinkedin').value, instagram: $('fInstagram').value, whatsapp: $('fWhatsapp').value,
@@ -913,7 +919,10 @@ function collectAgent(key) {
 function applyAgent(a) {
   if (a.color && /^#[0-9a-f]{6}$/i.test(a.color)) $('fColor').value = a.color;
   $('fNombre').value = a.name || ''; $('fCargo').value = a.role || '';
-  $('fZona').value = a.zona || ''; $('fTel').value = a.tel || '';
+  $('fZona').value = a.zona || '';
+  // Legacy agents have no zonaLabel: default to the original wording.
+  $('fZonaLabel').value = a.zonaLabel === undefined ? 'Specializing in' : a.zonaLabel;
+  $('fTel').value = a.tel || '';
   $('fEmail').value = a.email || ''; $('fWeb').value = a.web || 'canablue.com';
   $('fDir').value = a.dir || DIR_DEFAULT; $('fDirUrl').value = a.dirUrl || MAPS_DEFAULT;
   $('fListings').value = a.listings || ''; $('fLinkedin').value = a.linkedin || '';
@@ -1139,7 +1148,7 @@ $('tplGrid').addEventListener('click', e => {
   markDirty();
 });
 document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; markDirty(); });
-['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fBooking','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vBooking','vCommunity','vQr','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', markDirty));
+['fColor','fColorHex','fNombre','fCargo','fZona','fZonaLabel','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fBooking','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vBooking','vCommunity','vQr','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', markDirty));
 $('fColorHex').addEventListener('change', e => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('fColor').value = e.target.value; markDirty(); });
 $('fFotoFile').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;

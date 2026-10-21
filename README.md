@@ -60,6 +60,8 @@ deletes them.
    Leave `booking` empty to hide the "Schedule a Call" button. The `community` column is
    kept for backwards compatibility but no longer drives the signature: the
    "Community Expert:" links are fixed for every agent.
+   `zonaLabel` is optional: it is the text printed before the `zona` (default
+   "Specializing in"; leave it empty to print only the area).
 2. Share → General access → **Anyone with the link** (Viewer).
 3. Copy the spreadsheet ID from its URL (`/d/ID/edit`) and paste it in the
    creator's **Google Sheet ID** field → **Reload**. The ID is remembered.
@@ -69,6 +71,10 @@ deletes them.
 ## Optional signature pieces
 
 - **View My Listings** — pill button, uses the `listings` URL. Toggle in **Display**.
+- **Area of expertise** — the **Area of expertise** field prints after the **Text before
+  the area** field (default "Specializing in"), so the whole line is editable: change the
+  wording, translate it or leave the intro empty to show just the area. It appears in the
+  Main, Broker, Compact, Banner, Photo Left/Top/Right and Dark Sidebar templates.
 - **Schedule a Call** — pill button, appears only when the `booking` URL is set. Toggle in **Display**.
 - **Community Expert** — every template prints a **Community Expert:** label in bold
   followed by one small outline pill per community page: `Palma Real Villas (Cocotal)` →
