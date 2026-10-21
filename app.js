@@ -2,6 +2,11 @@
 const $ = id => document.getElementById(id);
 // Canablue community page (editable per agent, like listings or booking).
 const COMMUNITY_DEFAULT = 'https://canablue.com/community/cocotal/';
+// Community Expert block in the Main template: one pill per Canablue community page.
+const COMMUNITY_LINKS = [
+  { label: 'Palma Real Villas (Cocotal)', url: 'https://canablue.com/community/cocotal/' },
+  { label: 'Los Corales, Cortecito', url: 'https://canablue.com/community/el-cortecito/' }
+];
 const state = {
   tpl: 'principal',
   color: '#174176',
@@ -205,6 +210,12 @@ function viewPropsBtn(listings, c, opt) { return pillBtn(listings, 'View My List
 function scheduleBtn(url, c, opt) { return pillBtn(url, 'Schedule a Call', whiteGlyph('calendar'), c, 'filled', opt); }
 // Optional third pill: Canablue community (white with brand border and brand text)
 function communityBtn(url, c, opt) { return pillBtn(url, 'Community', IMG('ios-filled', 50, c.replace('#', ''), 'friends'), c, 'outline', opt); }
+// Small community page pill for the "Community Expert" block (label only, no icon).
+function communityPill(label, url, c, opt) {
+  const o = opt || {};
+  const fs = o.pfs || 10.5, pad = o.pad || '5px 11px', rad = o.rad || 15;
+  return `<a href="${url}" target="_blank" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;font-weight:bold;text-decoration:none;border-radius:${rad}px;padding:${pad};white-space:nowrap;background-color:#ffffff;color:${c};border:1px solid ${c};">${label}</a>`;
+}
 // Plain clean text, no pill background or border
 function zonaText(zona, sz) {
   const o = sz || {};
@@ -294,6 +305,26 @@ async function buildHTML() {
   };
   const viewBtn = pillsHtml();
 
+  // Main template: the action line carries only the primary actions; the community
+  // links moved to their own "Community Expert:" line.
+  const actionPills = (opt) => {
+    const pills = [];
+    if (s.vis.listings && s.listings) pills.push(viewPropsBtn(s.listings, c, opt));
+    if (s.vis.booking && s.booking) pills.push(scheduleBtn(s.booking, c, opt));
+    return pills.join('&nbsp;');
+  };
+  // "Community Expert:" + one smaller pill per community page. Desktop keeps the
+  // label inline; the phone variant stacks the label above the pills so they never
+  // get squeezed in a 360 px column.
+  const communityExpertHtml = (opt, stacked) => {
+    if (!s.vis.community) return '';
+    const o = opt || {};
+    const links = COMMUNITY_LINKS.map(x => communityPill(x.label, x.url, c, o)).join('&nbsp;');
+    const label = `<span style="font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 11}px;color:#5b6b84;white-space:nowrap;">Community Expert:</span>`;
+    if (stacked) return `<div>${label}</div><div style="padding-top:6px;">${links}</div>`;
+    return `${label}&nbsp;&nbsp;${links}`;
+  };
+
   const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign);
   const qr = (s.vis.qr && raw) ? qrRow(vcardText(raw), cal) : '';
   const zonaHtml = (sz) => (s.vis.zona && s.zona) ? zonaText(s.zona, sz) : '';
@@ -308,7 +339,9 @@ async function buildHTML() {
     logo: 140,
     pill: { fs: 12, pad: '7px 14px', rad: 17, gs: 13 },
     socialK: 1.12, certH: 29, qrH: 104,
-    legal: { fs: 10.5, lh: 15 }
+    legal: { fs: 10.5, lh: 15 },
+    community: { fs: 11.5, pfs: 10.5, pad: '5px 11px', rad: 15 },
+    communityMob: { fs: 11, pfs: 10, pad: '5px 9px', rad: 14 }
   };
 
   if (s.tpl === 'broker') {
@@ -420,12 +453,14 @@ async function buildHTML() {
 <tr><td style="padding:14px 0 0;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;max-width:100%;">&nbsp;</div></td></tr>
 <tr class="cb-desk"><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
 <td width="25%" valign="middle"><img src="${logoUrl}" width="${MAIN_SZ.logo}" style="width:${MAIN_SZ.logo}px;max-width:${MAIN_SZ.logo}px;display:block;" alt="Canablue"></td>
-<td width="50%" align="center" valign="middle" style="min-width:96px;">${pillsHtml(MAIN_SZ.pill)}</td>
+<td width="50%" align="center" valign="middle" style="min-width:96px;">${actionPills(MAIN_SZ.pill)}</td>
 <td width="25%" align="right" valign="middle" style="min-width:96px;">${socialsHtml(MAIN_SZ.socialK)}</td></tr></tbody></table></td></tr>
+<tr class="cb-desk"><td align="center" style="padding-top:10px;">${communityExpertHtml(MAIN_SZ.community)}</td></tr>
 <tr class="cb-mob" style="display:none;"><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
 <td width="68%" valign="middle"><img src="${logoUrl}" width="${MAIN_SZ.logo}" style="width:${MAIN_SZ.logo}px;max-width:${MAIN_SZ.logo}px;display:block;" alt="Canablue"></td>
 <td width="32%" align="right" valign="middle" style="min-width:96px;">${socialsHtml(MAIN_SZ.socialK)}</td></tr></tbody></table></td></tr>
-<tr class="cb-mob" style="display:none;"><td align="center" style="padding-top:14px;">${pillsHtml(MAIN_SZ.pill)}</td></tr>
+<tr class="cb-mob" style="display:none;"><td align="center" style="padding-top:14px;">${actionPills(MAIN_SZ.pill)}</td></tr>
+<tr class="cb-mob" style="display:none;"><td align="center" style="padding-top:10px;">${communityExpertHtml(MAIN_SZ.communityMob, true)}</td></tr>
 ${certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign, MAIN_SZ.certH)}${(s.vis.qr && raw) ? qrRow(vcardText(raw), cal, MAIN_SZ.qrH) : ''}${legalHtml(MAIN_SZ.legal)}</tbody></table>`;
 }
 
@@ -571,9 +606,10 @@ ${certs()}${qr()}${legal()}`;
 <i class="hline"></i>
 <span class="skrow">
   <span class="col" style="width:25%">${skLogo(140)}</span>
-  <span class="col colc" style="width:50%">${pills('justify-content:center')}</span>
+  <span class="col colc" style="width:50%"><span class="skrow tight" style="justify-content:center">${f.listings ? skPill(141) : ''}${f.booking ? skPill(122) : ''}</span></span>
   <span class="col colr" style="width:25%">${social()}</span>
 </span>
+${f.community ? `<span class="skrow tight" style="justify-content:center;padding-top:1.4cqw"><i class="bar sm" style="width:${q(104)}"></i>${skPill(166, 'ghost')}${skPill(139, 'ghost')}</span>` : ''}
 ${certs()}${qr()}${legal()}`;
 }
 let skKey = '';

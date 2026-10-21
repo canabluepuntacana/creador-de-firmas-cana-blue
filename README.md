@@ -68,13 +68,21 @@ deletes them.
 
 - **View My Listings** — pill button, uses the `listings` URL. Toggle in **Display**.
 - **Schedule a Call** — pill button, appears only when the `booking` URL is set. Toggle in **Display**.
-- **Community** — secondary pill button (white background, brand border and brand text),
-  uses the `community` URL (`https://canablue.com/community/cocotal/` by default, editable per
-  agent). Toggle in **Display**.
-- In the **Main** template the bottom row has two variants: on desktop the buttons sit
+- **Community** — in the seven compact templates it is a secondary pill button (white
+  background, brand border and brand text) that uses the `community` URL
+  (`https://canablue.com/community/cocotal/` by default, editable per agent). Toggle in **Display**.
+- In the **Main** template the bottom area has two variants: on desktop the actions sit
   in the centre of the logo row (logo on the left, social icons on the right); on a
   phone they drop to their own centred line under the logo. The signature carries a
   small media query that swaps them below 480 px.
+- In **Main** the action line holds only **View My Listings** (centred, also on the
+  phone) and an optional **Schedule a Call**. The community action is no longer a pill
+  on that line: a second line reads **Community Expert:** followed by one smaller
+  outline pill per community page — `Palma Real Villas (Cocotal)` →
+  `https://canablue.com/community/cocotal/` and `Los Corales, Cortecito` →
+  `https://canablue.com/community/el-cortecito/` (`COMMUNITY_LINKS` in `app.js`). On
+  desktop the label and both pills share one centred line; on a phone the label sits
+  above the two centred pills. The same **Show community links** toggle hides it.
 - The **Main** template runs one notch larger than the rest (`MAIN_SZ` in `app.js`):
   photo 118 px, name 18.5 px, role 13 px, contacts 12.5 px with 17 px icons, logo
   140 px, 12 px buttons and ~27 px social icons. It still fits the 600 px row, and each
