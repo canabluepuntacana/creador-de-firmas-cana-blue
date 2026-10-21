@@ -215,11 +215,13 @@ function communityPill(label, url, c, opt) {
   const fs = o.pfs || 10.5, pad = o.pad || '5px 11px', rad = o.rad || 15;
   return `<a href="${url}" target="_blank" style="display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:${fs}px;font-weight:bold;text-decoration:none;border-radius:${rad}px;padding:${pad};white-space:nowrap;background-color:#ffffff;color:${c};border:1px solid ${c};">${label}</a>`;
 }
-// Plain clean text, no pill background or border
+// Plain clean text, no pill background or border. Line breaks typed in the editor
+// (Enter inside "Area of expertise") print as real breaks.
 function zonaText(zona, sz, label) {
   const o = sz || {};
   const pre = label === undefined ? 'Specializing in' : String(label).trim();
-  return `<div style="max-width:${o.mw || 190}px;margin-top:${o.mt || 5}px;font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 11.5}px;color:#5b6b84;line-height:${o.lh || 16}px;">${pre ? pre + ' ' : ''}${zona}</div>`;
+  const body = String(zona).replace(/\r?\n/g, '<br>');
+  return `<div style="max-width:${o.mw || 190}px;margin-top:${o.mt || 5}px;font-family:Arial,Helvetica,sans-serif;font-size:${o.fs || 11.5}px;color:#5b6b84;line-height:${o.lh || 16}px;">${pre ? pre + ' ' : ''}${body}</div>`;
 }
 // Logos only, no heading label
 const CERT_DEFS = [
@@ -246,11 +248,14 @@ function certsRow(certs, links, customs, vis, align, h) {
 
 async function buildHTML() {
   const raw = state, c = cleanHex(raw.color);
+  // The area field is a textarea: keep its line breaks (printed as <br> in the signature)
+  // and drop the blank lines around the text.
+  const zonaClean = String(raw.zona || '').replace(/\r\n?/g, '\n').replace(/^\s+|\s+$/g, '');
   // Shallow copy used by every template below: plain-text fields are HTML-escaped
   // and URL fields normalized, so the interpolation further down is always safe.
   const s = {
     ...raw,
-    nombre: esc(raw.nombre), cargo: esc(raw.cargo), zona: esc(raw.zona),
+    nombre: esc(raw.nombre), cargo: esc(raw.cargo), zona: esc(zonaClean),
     zonaLabel: esc(raw.zonaLabel === undefined ? 'Specializing in' : raw.zonaLabel),
     tel: esc(raw.tel), email: esc(raw.email), web: esc(raw.web),
     dir: esc(raw.dir), legal: esc(raw.legal),
@@ -323,6 +328,8 @@ async function buildHTML() {
   const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign);
   const qr = (s.vis.qr && raw) ? qrRow(vcardText(raw), cal) : '';
   const zonaHtml = (sz) => (s.vis.zona && s.zona) ? zonaText(s.zona, sz, s.zonaLabel) : '';
+  // Broker and Banner print the area inside the role line, so a manual break becomes " · ".
+  const zonaFlat = String(s.zona || '').replace(/\r?\n/g, ' · ');
   const zona = zonaHtml();
 
   // The Main template runs one notch larger: its 600 px row has room to breathe.
@@ -357,7 +364,7 @@ async function buildHTML() {
   if (s.tpl === 'moderna') {
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
 <tr><td style="background-color:${c};border-radius:10px 10px 0 0;padding:18px 22px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
-<td valign="middle"><div style="color:#ffffff;font-size:19px;font-weight:bold;line-height:24px;">${s.nombre}</div><div style="color:#d7e1f2;font-size:12.5px;">${s.cargo}${s.vis.zona && s.zona ? ' · ' + s.zona : ''}</div></td>
+<td valign="middle"><div style="color:#ffffff;font-size:19px;font-weight:bold;line-height:24px;">${s.nombre}</div><div style="color:#d7e1f2;font-size:12.5px;">${s.cargo}${s.vis.zona && s.zona ? ' · ' + zonaFlat : ''}</div></td>
 <td width="90" align="right" valign="middle">${s.vis.foto ? `<img src="${s.foto}" width="76" height="76" style="width:76px;height:76px;border-radius:50%;border:3px solid #ffffff;display:inline-block;" alt="">` : ''}</td>
 </tr></tbody></table></td></tr>
 <tr><td style="border:1px solid #e3e8f0;border-top:0;border-radius:0 0 10px 10px;padding:16px 22px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
@@ -370,7 +377,7 @@ async function buildHTML() {
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
 <tr><td style="background-color:${c};border-radius:10px 10px 0 0;padding:20px 22px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
 <td width="100" valign="middle">${sqPhoto}</td>
-<td valign="middle"><div style="color:#ffffff;font-size:21px;font-weight:bold;line-height:25px;">${s.nombre}</div><div style="color:#d7e1f2;font-size:12.5px;margin-top:3px;">${s.cargo}${s.vis.zona && s.zona ? ' · ' + s.zona : ''}</div></td>
+<td valign="middle"><div style="color:#ffffff;font-size:21px;font-weight:bold;line-height:25px;">${s.nombre}</div><div style="color:#d7e1f2;font-size:12.5px;margin-top:3px;">${s.cargo}${s.vis.zona && s.zona ? ' · ' + zonaFlat : ''}</div></td>
 </tr></tbody></table></td></tr>
 <tr><td style="border:1px solid #e3e8f0;border-top:0;padding:18px 22px 6px;"><table cellpadding="0" cellspacing="0" border="0" width="100%"><tbody><tr>
 <td valign="top" width="56%"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
@@ -381,7 +388,7 @@ async function buildHTML() {
   }
   if (s.tpl === 'sidebar') {
     const sidePhoto = s.vis.foto ? `<img src="${s.foto}" width="88" height="88" style="width:88px;height:88px;border-radius:50%;object-fit:cover;display:inline-block;border:3px solid #ffffff;" alt="${s.nombre}">` : '';
-    const sideZona = (s.vis.zona && s.zona) ? `<div style="margin-top:6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#d7e1f2;line-height:15px;">${String(s.zonaLabel || '').trim() ? String(s.zonaLabel).trim() + ' ' : ''}${s.zona}</div>` : '';
+    const sideZona = (s.vis.zona && s.zona) ? `<div style="margin-top:6px;font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#d7e1f2;line-height:15px;">${String(s.zonaLabel || '').trim() ? String(s.zonaLabel).trim() + ' ' : ''}${String(s.zona).replace(/\r?\n/g, '<br>')}</div>` : '';
     return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody><tr>
 <td width="190" valign="top" align="center" style="background-color:${c};border-radius:10px 0 0 10px;padding:24px 16px;">${sidePhoto}
 <div style="color:#ffffff;font-size:16px;font-weight:bold;margin-top:12px;line-height:20px;">${s.nombre}</div>
@@ -649,9 +656,21 @@ function updateStats(html) {
 let isDirty = false;
 function setDirty(on) { isDirty = !!on; const d = $('dirtyChip'); if (d) d.hidden = !on; }
 function markDirty() { setDirty(true); render(); }
+// "Area of expertise" is a textarea: grow it so every line the agent types stays visible.
+function growZona() {
+  const t = $('fZona');
+  if (!t || t.tagName !== 'TEXTAREA') return;
+  // The card can be hidden behind the rail: scrollHeight is 0 there, so wait until
+  // the section is visible (the rail handler calls this again).
+  if (!t.offsetParent) return;
+  t.style.height = 'auto';
+  t.style.height = (t.scrollHeight + 2) + 'px';
+}
 function syncStateFromInputs() {
   state.color = $('fColor').value || '#174176'; $('fColorHex').value = state.color.toUpperCase();
-  state.nombre = $('fNombre').value; state.cargo = $('fCargo').value; state.zona = $('fZona').value;
+  state.nombre = $('fNombre').value; state.cargo = $('fCargo').value;
+  // The area is a textarea: keep the line breaks, drop the blank line at the end.
+  state.zona = $('fZona').value.replace(/\s+$/, '');
   state.zonaLabel = $('fZonaLabel').value;
   state.tel = $('fTel').value; state.email = $('fEmail').value; state.web = $('fWeb').value; state.dir = $('fDir').value; state.dirUrl = $('fDirUrl').value;
   state.listings = $('fListings').value; state.linkedin = $('fLinkedin').value;
@@ -901,7 +920,7 @@ async function loadAgents() {
 function collectAgent(key) {
   return {
     key, color: $('fColor').value, name: $('fNombre').value, role: $('fCargo').value,
-    zona: $('fZona').value, zonaLabel: $('fZonaLabel').value, tel: $('fTel').value, email: $('fEmail').value, web: $('fWeb').value,
+    zona: $('fZona').value.replace(/\s+$/, ''), zonaLabel: $('fZonaLabel').value, tel: $('fTel').value, email: $('fEmail').value, web: $('fWeb').value,
     dir: $('fDir').value, dirUrl: $('fDirUrl').value, listings: $('fListings').value,
     booking: $('fBooking').value, community: state.community,
     linkedin: $('fLinkedin').value, instagram: $('fInstagram').value, whatsapp: $('fWhatsapp').value,
@@ -920,6 +939,7 @@ function applyAgent(a) {
   if (a.color && /^#[0-9a-f]{6}$/i.test(a.color)) $('fColor').value = a.color;
   $('fNombre').value = a.name || ''; $('fCargo').value = a.role || '';
   $('fZona').value = a.zona || '';
+  growZona();
   // Legacy agents have no zonaLabel: default to the original wording.
   $('fZonaLabel').value = a.zonaLabel === undefined ? 'Specializing in' : a.zonaLabel;
   $('fTel').value = a.tel || '';
@@ -1138,6 +1158,7 @@ document.querySelectorAll('#iconStyleSeg button').forEach(b => b.onclick = () =>
 document.querySelectorAll('.rail button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.rail button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.editor .card').forEach(c => c.classList.toggle('show', c.id === b.dataset.sec));
+  growZona();
 });
 // Delegated: the thumbnails are rebuilt whenever a toggle changes, so per-button
 // handlers would be lost on every rebuild.
@@ -1149,6 +1170,8 @@ $('tplGrid').addEventListener('click', e => {
 });
 document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; markDirty(); });
 ['fColor','fColorHex','fNombre','fCargo','fZona','fZonaLabel','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fBooking','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vBooking','vCommunity','vQr','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', markDirty));
+$('fZona').addEventListener('input', growZona);
+growZona();
 $('fColorHex').addEventListener('change', e => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('fColor').value = e.target.value; markDirty(); });
 $('fFotoFile').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
