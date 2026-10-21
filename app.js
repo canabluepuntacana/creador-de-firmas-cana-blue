@@ -383,8 +383,9 @@ async function buildHTML() {
 </tr></tbody></table></td></tr>
 <tr><td style="padding:14px 0 0;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;max-width:100%;">&nbsp;</div></td></tr>
 <tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
-<td width="76%" valign="middle"><table cellpadding="0" cellspacing="0" border="0" style="max-width:100%;"><tbody><tr><td valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td><td width="10"></td><td valign="middle" style="min-width:96px;">${viewBtn}</td></tr></tbody></table></td>
+<td width="76%" valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td>
 <td width="24%" align="right" valign="middle" style="min-width:96px;">${socials}</td></tr></tbody></table></td></tr>
+<tr><td align="center" style="padding-top:14px;">${viewBtn}</td></tr>
 ${certs}${qr}${legal}</tbody></table>`;
 }
 
@@ -429,7 +430,7 @@ function skelFor(tpl, f) {
   const name = dark => skBar(58, dark && 'wh') + skBar(34, dark ? 'whs' : 'sm') + (f.zona ? skBar(72, dark ? 'whs' : 'sm') : '');
   const contacts = () => [84, 62, 72, 55].map(w => `<span class="crow"><i class="cico"></i>${skBar(w)}</span>`).join('');
   const photo = px => f.photo ? skPhoto(px) : '';
-  const pills = () => `<span class="skrow tight">${f.listings ? skPill(136) : ''}${f.booking ? skPill(122) : ''}${f.community ? skPill(104, 'ghost') : ''}</span>`;
+  const pills = (style = '') => `<span class="skrow tight"${style ? ` style="${style}"` : ''}>${f.listings ? skPill(136) : ''}${f.booking ? skPill(122) : ''}${f.community ? skPill(104, 'ghost') : ''}</span>`;
   const social = () => f.socials ? `<span class="dots">${'<i></i>'.repeat(f.socials)}</span>` : '';
   const certs = () => f.certs ? `<span class="certs" style="justify-content:${f.align}">${'<i></i>'.repeat(f.certs)}</span>` : '';
   const legal = () => f.legal ? `<span class="lg">${skBar(58, 'sm')}${skBar(40, 'sm')}</span>` : '';
@@ -529,9 +530,10 @@ ${certs()}${qr()}${legal()}`;
 </span>
 <i class="hline"></i>
 <span class="skrow between">
-  <span class="skrow tight">${skLogo(128)}${pills()}</span>
+  ${skLogo(128)}
   ${social()}
 </span>
+${pills('justify-content:center;margin-top:2.4cqw')}
 ${certs()}${qr()}${legal()}`;
 }
 let skKey = '';

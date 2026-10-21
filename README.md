@@ -71,6 +71,8 @@ deletes them.
 - **Community** — secondary pill button (white background, brand border and brand text),
   uses the `community` URL (`https://canablue.com/community/cocotal/` by default, editable per
   agent). Toggle in **Display**.
+- In the **Main** template the buttons sit in their own row, centred across the full
+  width, with a space under the logo row (logo on the left, social icons on the right).
 - **Contact QR (vCard)** — encodes the agent's vCard (name, title, phone, email, site,
   address) so a scan saves the contact. It ships as an embedded PNG, no image host needed.
   Off by default; enable it in **Display**. **Download contact (.vcf)** exports the same
