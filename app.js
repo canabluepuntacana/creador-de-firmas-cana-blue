@@ -373,8 +373,13 @@ async function buildHTML() {
 <tr><td colspan="3"><table cellpadding="0" cellspacing="0" border="0" width="100%">${certs}${qr}${legal}</table></td></tr>
 </tbody></table>`;
   }
-  // Main template
-  return `<table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
+  // Main template.
+  // The bottom row ships in two variants: on desktop the buttons sit in the
+  // centre of the logo row (logo | buttons | socials); on a phone they drop to
+  // their own centred line under the logo. The <style> block swaps them below
+  // 480 px. Outlook desktop ignores media queries and keeps the desktop row —
+  // the mobile rows are hidden inline, so they never show up twice.
+  return `<style>@media only screen and (max-width:480px){.cb-desk{display:none !important}.cb-mob{display:table-row !important}}</style><table cellpadding="0" cellspacing="0" border="0" width="600" style="font-family:Arial,Helvetica,sans-serif;max-width:600px;"><tbody>
 <tr><td><table cellpadding="0" cellspacing="0" border="0"><tbody><tr>
 <td width="130" valign="middle">${fotoCell(105)}</td>
 <td valign="middle"><div style="font-size:17px;font-weight:700;color:#111;line-height:22px;">${s.nombre}</div><div style="font-size:12px;color:#111;">${s.cargo}</div>${zona}</td>
@@ -382,10 +387,14 @@ async function buildHTML() {
 <td valign="middle"><table cellpadding="0" cellspacing="0" border="0">${rows}</table></td>
 </tr></tbody></table></td></tr>
 <tr><td style="padding:14px 0 0;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;max-width:100%;">&nbsp;</div></td></tr>
-<tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
+<tr class="cb-desk"><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
+<td width="25%" valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td>
+<td width="50%" align="center" valign="middle" style="min-width:96px;">${viewBtn}</td>
+<td width="25%" align="right" valign="middle" style="min-width:96px;">${socials}</td></tr></tbody></table></td></tr>
+<tr class="cb-mob" style="display:none;"><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
 <td width="76%" valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td>
 <td width="24%" align="right" valign="middle" style="min-width:96px;">${socials}</td></tr></tbody></table></td></tr>
-<tr><td align="center" style="padding-top:14px;">${viewBtn}</td></tr>
+<tr class="cb-mob" style="display:none;"><td align="center" style="padding-top:14px;">${viewBtn}</td></tr>
 ${certs}${qr}${legal}</tbody></table>`;
 }
 
@@ -529,11 +538,11 @@ ${certs()}${qr()}${legal()}`;
   <span class="col" style="width:34%">${contacts()}</span>
 </span>
 <i class="hline"></i>
-<span class="skrow between">
-  ${skLogo(128)}
-  ${social()}
+<span class="skrow">
+  <span class="col" style="width:25%">${skLogo(128)}</span>
+  <span class="col colc" style="width:50%">${pills('justify-content:center')}</span>
+  <span class="col colr" style="width:25%">${social()}</span>
 </span>
-${pills('justify-content:center;margin-top:2.4cqw')}
 ${certs()}${qr()}${legal()}`;
 }
 let skKey = '';
@@ -555,7 +564,9 @@ async function render() {
   syncStateFromInputs();
   renderSkels();
   const html = await buildHTML();
-  $('sigPreview').innerHTML = html;
+  // The preview must not run the signature's own media query (the browser window
+  // is not a phone): the app simulates the mobile layout with its own CSS.
+  $('sigPreview').innerHTML = html.replace(/<style[\s\S]*?<\/style>/gi, '');
   fitPreview();
   $('codeText').textContent = html;
   updateStats(html);

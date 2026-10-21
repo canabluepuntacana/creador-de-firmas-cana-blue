@@ -71,8 +71,10 @@ deletes them.
 - **Community** — secondary pill button (white background, brand border and brand text),
   uses the `community` URL (`https://canablue.com/community/cocotal/` by default, editable per
   agent). Toggle in **Display**.
-- In the **Main** template the buttons sit in their own row, centred across the full
-  width, with a space under the logo row (logo on the left, social icons on the right).
+- In the **Main** template the bottom row has two variants: on desktop the buttons sit
+  in the centre of the logo row (logo on the left, social icons on the right); on a
+  phone they drop to their own centred line under the logo. The signature carries a
+  small media query that swaps them below 480 px.
 - **Contact QR (vCard)** — encodes the agent's vCard (name, title, phone, email, site,
   address) so a scan saves the contact. It ships as an embedded PNG, no image host needed.
   Off by default; enable it in **Display**. **Download contact (.vcf)** exports the same
@@ -101,6 +103,10 @@ browser.
   *Outline*, *Square line* and *Soft* icon styles lose their rounding there (they still
   look correct in Gmail/Apple Mail/mobile). Fixing that needs VML markup, which is not
   included because it cannot be verified in this environment — test in real Outlook first.
+- **Outlook desktop ignores media queries**, so the **Main** template always shows the
+  desktop row there (logo | buttons | social icons); phones that honour the query get
+  the mobile row (logo + social icons, buttons centred underneath). If a client strips
+  the `<style>` block when pasting, it shows the desktop row as well.
 - The toolbar shows the **weight of the copied HTML**; Gmail clips signatures over ~102 KB.
 - After deploying a change, bump the `?v=` query on `styles.css` / `app.js` in
   `index.html` (GitHub Pages caches them aggressively).

@@ -164,6 +164,10 @@ textarea{resize:vertical}
 .preview-box.mobile{width:410px;max-width:100%;margin:0 auto;padding:10px;border-radius:44px;background:#0d1b33;box-shadow:0 22px 44px rgba(13,27,51,.26);overflow:hidden;box-sizing:border-box}
 .preview-box.mobile #sigPreview{display:block;width:390px;max-width:100%;height:844px;background:#fff;border-radius:34px;overflow:auto;padding:14px;box-sizing:border-box}
 .preview-box.mobile #sigPreview > table{width:auto !important;max-width:100% !important}
+/* The signature's own media query swaps the Main template's bottom row on a
+   phone. The preview does not evaluate it, so the app simulates the swap. */
+.preview-box.mobile .cb-desk{display:none !important}
+.preview-box.mobile .cb-mob{display:table-row !important}
 .switch{font-size:13px;display:flex;gap:6px;align-items:center;cursor:pointer}
 .switch input{width:auto}
 .tool-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
