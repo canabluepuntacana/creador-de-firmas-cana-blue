@@ -55,9 +55,9 @@ deletes them.
 ## Google Sheets database
 
 1. Create a spreadsheet with a tab named `Agentes` and this exact header row:
-   `key | name | role | zona | tel | email | web | dir | dirUrl | listings | booking | linkedin | instagram | whatsapp | foto | logo | color | tpl | iconStyle | certsAlign | qr | crs | aei | realtor | sr23 | sr24 | lux`
+   `key | name | role | zona | tel | email | web | dir | dirUrl | listings | booking | community | linkedin | instagram | whatsapp | foto | logo | color | tpl | iconStyle | certsAlign | qr | crs | aei | realtor | sr23 | sr24 | lux`
    Cert columns and `qr` use `TRUE` / `FALSE`; `iconStyle` is `solid`, `rounded`, `outline`, `frame`, `line` or `soft`; `certsAlign` is `left`, `center` or `right`; `tpl` is the template key (`principal`, `broker`, `moderna`, `banner`, `sidebar`, `photo-left`, `photo-top`, `photo-right`).
-   Leave `booking` empty to hide the "Schedule a Call" button.
+   Leave `booking` empty to hide the "Schedule a Call" button, and `community` empty to hide the "Community" button.
 2. Share → General access → **Anyone with the link** (Viewer).
 3. Copy the spreadsheet ID from its URL (`/d/ID/edit`) and paste it in the
    creator's **Google Sheet ID** field → **Reload**. The ID is remembered.
@@ -68,6 +68,9 @@ deletes them.
 
 - **View My Listings** — pill button, uses the `listings` URL. Toggle in **Display**.
 - **Schedule a Call** — pill button, appears only when the `booking` URL is set. Toggle in **Display**.
+- **Community** — secondary pill button (white background, brand border and brand text),
+  uses the `community` URL (`https://canablue.com/community/cocotal/` by default, editable per
+  agent). Toggle in **Display**.
 - **Contact QR (vCard)** — encodes the agent's vCard (name, title, phone, email, site,
   address) so a scan saves the contact. It ships as an embedded PNG, no image host needed.
   Off by default; enable it in **Display**. **Download contact (.vcf)** exports the same
@@ -76,11 +79,13 @@ deletes them.
 
 ## Preview width
 
-The toolbar has two buttons: **desktop** (fluid, as wide as the panel) and **mobile**
-(a phone frame whose screen is a 390 × 844 px viewport, the logical size of an iPhone
-14/15). In mobile mode the signature is zoomed down to fit that viewport and scrolls
-inside it, which is how fixed-width tables look on a phone. Your choice is remembered in
-the browser.
+The toolbar has two buttons: **desktop** and **mobile** (a phone frame whose screen is a
+390 × 844 px viewport, the logical size of an iPhone 14/15). In desktop mode the signature
+keeps its real 600 px layout and is scaled down to fit the panel, so the preview shows the
+exact geometry the client renders. In mobile mode the signature is squeezed to the screen
+width instead of being scaled as a whole — that is how fixed-width tables really look on a
+phone, so you can see where a button or an icon wraps. Your choice is remembered in the
+browser.
 
 ## Email client notes
 

@@ -1,5 +1,7 @@
 /* Canablue Signature Creator — table-based HTML, 100% email-client compatible */
 const $ = id => document.getElementById(id);
+// Canablue community page (editable per agent, like listings or booking).
+const COMMUNITY_DEFAULT = 'https://canablue.com/community/cocotal/';
 const state = {
   tpl: 'principal',
   color: '#174176',
@@ -9,6 +11,7 @@ const state = {
   dirUrl: 'https://www.google.com/maps/place/Canablue+Real+Estate/data=!4m2!3m1!1s0x0:0x14220523874e3b46?sa=X&ved=1t:2428&ictx=111',
   listings: 'https://canablue.com/author/pamepam/',
   booking: '',
+  community: COMMUNITY_DEFAULT,
   linkedin: 'https://do.linkedin.com/in/pamela-nunez-0280814a',
   instagram: 'https://www.instagram.com/pamela_canablue.rd',
   whatsapp: 'https://wa.me/18096080943',
@@ -20,7 +23,7 @@ const state = {
   certsAlign: 'center',
   extra: [],
   iconStyle: 'solid',
-  vis: { foto: true, zona: true, social: true, listings: true, booking: true, qr: false, certs: true, legal: true },
+  vis: { foto: true, zona: true, social: true, listings: true, booking: true, community: true, qr: false, certs: true, legal: true },
   legal: 'The information in this email is confidential and intended solely for its recipient.'
 };
 const DEFAULT_LEGAL = 'The information in this email is confidential and intended solely for its recipient.';
@@ -176,16 +179,23 @@ function contactRow(iconUrl, contentHtml, alt) {
 function socialBtn(href, bg, iconUrl, alt) {
   return `<a href="${href}" target="_blank" style="display:inline-block;width:24px;height:24px;border-radius:50%;background-color:${bg};text-align:center;vertical-align:middle;"><img src="${iconUrl}" width="13" height="13" alt="${alt}" style="display:inline-block;width:13px;height:13px;margin-top:5px;border:0;"></a>`;
 }
+// Pill buttons (compact). Filled ones use the brand color; the "Community" button is
+// the secondary action: white background, brand border and brand text.
+function pillBtn(href, label, glyph, c, variant) {
+  if (!href) return '';
+  const base = 'display:inline-block;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;text-decoration:none;border-radius:16px;padding:6px 12px;white-space:nowrap;';
+  const img = `<img src="${glyph}" width="12" height="12" alt="" style="display:inline-block;width:12px;height:12px;vertical-align:-2px;border:0;">&nbsp;${label}`;
+  if (variant === 'outline') {
+    return `<a href="${href}" target="_blank" style="${base}background-color:#ffffff;color:${c};border:1px solid ${c};">${img}</a>`;
+  }
+  return `<a href="${href}" target="_blank" style="${base}background-color:${c};color:#ffffff;">${img}</a>`;
+}
 // Pill button with modern home icon, placed next to the Canablue logo
-function viewPropsBtn(listings, c) {
-  if (!listings) return '';
-  return `<a href="${listings}" target="_blank" style="display:inline-block;background-color:${c};color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;text-decoration:none;border-radius:20px;padding:8px 16px;white-space:nowrap;"><img src="${whiteGlyph('home')}" width="14" height="14" alt="" style="display:inline-block;width:14px;height:14px;vertical-align:-2px;border:0;">&nbsp;View My Listings</a>`;
-}
+function viewPropsBtn(listings, c) { return pillBtn(listings, 'View My Listings', whiteGlyph('home'), c); }
 // Optional second pill: booking / agenda link (Calendly, etc.)
-function scheduleBtn(url, c) {
-  if (!url) return '';
-  return `<a href="${url}" target="_blank" style="display:inline-block;background-color:${c};color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:bold;text-decoration:none;border-radius:20px;padding:8px 16px;white-space:nowrap;"><img src="${whiteGlyph('calendar')}" width="14" height="14" alt="" style="display:inline-block;width:14px;height:14px;vertical-align:-2px;border:0;">&nbsp;Schedule a Call</a>`;
-}
+function scheduleBtn(url, c) { return pillBtn(url, 'Schedule a Call', whiteGlyph('calendar'), c); }
+// Optional third pill: Canablue community (white with brand border and brand text)
+function communityBtn(url, c) { return pillBtn(url, 'Community', IMG('ios-filled', 50, c.replace('#', ''), 'friends'), c, 'outline'); }
 // Plain clean text, no pill background or border
 function zonaText(zona) {
   return `<div style="max-width:190px;margin-top:5px;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;color:#5b6b84;line-height:16px;">Specializing in ${zona}</div>`;
@@ -223,6 +233,7 @@ async function buildHTML() {
     tel: esc(raw.tel), email: esc(raw.email), web: esc(raw.web),
     dir: esc(raw.dir), legal: esc(raw.legal),
     dirUrl: normUrl(raw.dirUrl), listings: normUrl(raw.listings), booking: normUrl(raw.booking),
+    community: normUrl(raw.community),
     instagram: normUrl(raw.instagram), whatsapp: normUrl(raw.whatsapp), linkedin: normUrl(raw.linkedin),
     foto: normUrl(raw.foto), logo: normUrl(raw.logo),
     extra: (raw.extra || []).map(e => ({ ...e, url: normUrl(e.url) })),
@@ -262,6 +273,7 @@ async function buildHTML() {
   const pills = [];
   if (s.vis.listings && s.listings) pills.push(viewPropsBtn(s.listings, c));
   if (s.vis.booking && s.booking) pills.push(scheduleBtn(s.booking, c));
+  if (s.vis.community && s.community) pills.push(communityBtn(s.community, c));
   const viewBtn = pills.join('&nbsp;');
 
   const certs = certsRow(s.certs, s.certLinks, s.customCerts, s.vis, s.certsAlign);
@@ -371,15 +383,178 @@ async function buildHTML() {
 </tr></tbody></table></td></tr>
 <tr><td style="padding:14px 0 0;"><div style="border-top:1px solid ${c};font-size:0;line-height:0;max-width:100%;">&nbsp;</div></td></tr>
 <tr><td><table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:100%;table-layout:fixed;"><tbody><tr>
-<td valign="middle"><table cellpadding="0" cellspacing="0" border="0" style="max-width:100%;"><tbody><tr><td valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td><td width="10"></td><td valign="middle" style="min-width:96px;">${viewBtn}</td></tr></tbody></table></td>
-<td align="right" valign="middle" style="min-width:96px;">${socials}</td></tr></tbody></table></td></tr>
+<td width="76%" valign="middle"><table cellpadding="0" cellspacing="0" border="0" style="max-width:100%;"><tbody><tr><td valign="middle"><img src="${logoUrl}" width="128" style="width:128px;max-width:128px;display:block;" alt="Canablue"></td><td width="10"></td><td valign="middle" style="min-width:96px;">${viewBtn}</td></tr></tbody></table></td>
+<td width="24%" align="right" valign="middle" style="min-width:96px;">${socials}</td></tr></tbody></table></td></tr>
 ${certs}${qr}${legal}</tbody></table>`;
 }
 
+// ---- Template thumbnails ----------------------------------------------------------
+// Wireframes, not renders: no names, no photos, no brand colours. What IS faithful is
+// the DISTRIBUTION — same columns, same row order and the same relative widths as the
+// templates in buildHTML(), so the layout you pick is the layout you get.
+// Every size is written in cqw (1 cqw = 1% of the card = 6 px of the real 600 px
+// signature), so the miniature keeps those proportions at any card width.
+const TPLS = [
+  ['principal', 'Main'], ['broker', 'Broker'], ['moderna', 'Compact'], ['banner', 'Banner'],
+  ['sidebar', 'Dark Sidebar'], ['photo-left', 'Photo Left'], ['photo-top', 'Photo Top'], ['photo-right', 'Photo Right']
+];
+const SK_CLASS = { moderna: 'bleed', banner: 'bleed', sidebar: 'split' };
+const q = px => (px / 6).toFixed(2) + 'cqw';
+const skBar = (w, cls) => `<i class="bar${cls ? ' ' + cls : ''}" style="width:${w}%"></i>`;
+const skPhoto = px => `<span class="ph" style="width:${q(px)};height:${q(px)}"></span>`;
+const skLogo = px => `<span class="logo" style="width:${q(px)};height:${q(26)}"></span>`;
+const skPill = (px, cls) => `<span class="pill${cls ? ' ' + cls : ''}" style="width:${q(px)}"></span>`;
+// What the current agent actually shows, so the thumbnails do not promise rows that
+// the signature will not print (empty URL, toggle off, no photo...).
+function skFlags() {
+  const v = state.vis || {};
+  const socials = ['instagram', 'whatsapp', 'linkedin'].filter(k => String(state[k] || '').trim()).length
+    + (state.extra || []).filter(e => e && String(e.url || '').trim()).length;
+  const certs = CERT_DEFS.filter(([k]) => state.certs && state.certs[k]).length
+    + (state.customCerts || []).filter(x => x && x.img).length;
+  return {
+    photo: !!v.foto && !!String(state.foto || '').trim(),
+    zona: !!v.zona && !!String(state.zona || '').trim(),
+    socials: v.social ? Math.min(socials, 6) : 0,
+    certs: v.certs ? Math.min(certs, 8) : 0,
+    legal: !!v.legal,
+    qr: !!v.qr,
+    listings: !!v.listings && !!String(state.listings || '').trim(),
+    booking: !!v.booking && !!String(state.booking || '').trim(),
+    community: !!v.community && !!String(state.community || '').trim(),
+    align: ['left', 'center', 'right'].includes(state.certsAlign) ? state.certsAlign : 'center'
+  };
+}
+function skelFor(tpl, f) {
+  const name = dark => skBar(58, dark && 'wh') + skBar(34, dark ? 'whs' : 'sm') + (f.zona ? skBar(72, dark ? 'whs' : 'sm') : '');
+  const contacts = () => [84, 62, 72, 55].map(w => `<span class="crow"><i class="cico"></i>${skBar(w)}</span>`).join('');
+  const photo = px => f.photo ? skPhoto(px) : '';
+  const pills = () => `<span class="skrow tight">${f.listings ? skPill(136) : ''}${f.booking ? skPill(122) : ''}${f.community ? skPill(104, 'ghost') : ''}</span>`;
+  const social = () => f.socials ? `<span class="dots">${'<i></i>'.repeat(f.socials)}</span>` : '';
+  const certs = () => f.certs ? `<span class="certs" style="justify-content:${f.align}">${'<i></i>'.repeat(f.certs)}</span>` : '';
+  const legal = () => f.legal ? `<span class="lg">${skBar(58, 'sm')}${skBar(40, 'sm')}</span>` : '';
+  const qr = () => f.qr ? `<span class="qwrap"><span class="qr"></span><span class="lg">${skBar(90, 'sm')}${skBar(60, 'sm')}</span></span>` : '';
+  if (tpl === 'broker') return `
+<span class="skrow" style="align-items:stretch">
+  <span class="col colc" style="width:33.3%">${photo(110)}${name()}</span>
+  <i class="vline"></i>
+  <span class="col" style="flex:1">${contacts()}</span>
+</span>
+<i class="hline"></i>
+<span class="skrow between" style="align-items:center">
+  ${certs()}
+  <span class="col colr">${skLogo(130)}${pills()}${social()}</span>
+</span>
+${qr()}${legal()}`;
+  if (tpl === 'moderna') return `
+<span class="band">
+  <span class="skrow between">
+    <span class="col" style="flex:1">${name(true)}</span>
+    ${photo(76)}
+  </span>
+</span>
+<span class="body">
+  <span class="skrow" style="align-items:flex-start">
+    <span class="col" style="width:55%">${contacts()}</span>
+    <span class="col colr" style="flex:1">${skLogo(125)}${pills()}${social()}</span>
+  </span>
+  ${certs()}${qr()}${legal()}
+</span>`;
+  if (tpl === 'banner') return `
+<span class="band">
+  <span class="skrow">
+    ${photo(84)}
+    <span class="col" style="flex:1">${name(true)}</span>
+  </span>
+</span>
+<span class="body">
+  <span class="skrow" style="align-items:flex-start">
+    <span class="col" style="width:56%">${contacts()}</span>
+    <span class="col colc" style="flex:1">${pills()}${social()}${skLogo(115)}</span>
+  </span>
+</span>
+<span class="foot">
+  <i class="hline"></i>
+  ${certs()}${qr()}${legal()}
+</span>`;
+  if (tpl === 'sidebar') return `
+<span class="side">
+  ${photo(88)}
+  <span class="col colc" style="width:100%">${name(true)}</span>
+  ${social()}
+</span>
+<span class="panel">
+  ${contacts()}
+  ${pills()}
+  ${skLogo(120)}
+  ${certs()}${qr()}${legal()}
+</span>`;
+  if (tpl === 'photo-left') return `
+<span class="skrow" style="align-items:flex-start">
+  <span class="col colc" style="width:25%">${photo(110)}${skLogo(110)}${social()}</span>
+  <span class="col" style="flex:1;gap:1.6cqw">
+    ${name()}
+    <i class="hline"></i>
+    ${contacts()}
+    ${pills()}
+  </span>
+</span>
+${certs()}${qr()}${legal()}`;
+  if (tpl === 'photo-top') return `
+<span class="col colc" style="width:100%">${photo(120)}${name()}</span>
+<i class="hline"></i>
+<span class="skrow" style="align-items:flex-start">
+  <span class="col" style="flex:1">${contacts()}${pills()}</span>
+  <span class="col colr" style="flex:1">${skLogo(130)}${social()}</span>
+</span>
+${certs()}${qr()}${legal()}
+<i class="hline"></i>`;
+  if (tpl === 'photo-right') return `
+<span class="skrow" style="align-items:flex-start">
+  <span class="col" style="flex:1;gap:1.6cqw">
+    ${name()}
+    <i class="hline"></i>
+    ${contacts()}
+    ${pills()}
+  </span>
+  <span class="col colc" style="width:28.3%">${photo(120)}${skLogo(120)}${social()}</span>
+</span>
+${certs()}${qr()}${legal()}`;
+  return `
+<span class="skrow" style="align-items:stretch">
+  <span class="col colc" style="width:21.7%">${photo(105)}</span>
+  <span class="col" style="flex:1">${name()}</span>
+  <i class="vline"></i>
+  <span class="col" style="width:34%">${contacts()}</span>
+</span>
+<i class="hline"></i>
+<span class="skrow between">
+  <span class="skrow tight">${skLogo(128)}${pills()}</span>
+  ${social()}
+</span>
+${certs()}${qr()}${legal()}`;
+}
+let skKey = '';
+function renderSkels(force) {
+  const grid = $('tplGrid');
+  if (!grid) return;
+  const f = skFlags();
+  const key = JSON.stringify([state.tpl, f]);
+  if (!force && key === skKey) return;
+  skKey = key;
+  grid.innerHTML = TPLS.map(([tpl, label]) => {
+    const on = tpl === state.tpl;
+    return `<button type="button" data-tpl="${tpl}" class="tpl${on ? ' active' : ''}" aria-pressed="${on}" title="${label}"><span class="sk${SK_CLASS[tpl] ? ' ' + SK_CLASS[tpl] : ''}">${skelFor(tpl, f)}</span><span class="tname">${label}</span></button>`;
+  }).join('');
+}
+renderSkels(true);
+
 async function render() {
   syncStateFromInputs();
+  renderSkels();
   const html = await buildHTML();
   $('sigPreview').innerHTML = html;
+  fitPreview();
   $('codeText').textContent = html;
   updateStats(html);
   autosave();
@@ -402,16 +577,33 @@ function syncStateFromInputs() {
   state.tel = $('fTel').value; state.email = $('fEmail').value; state.web = $('fWeb').value; state.dir = $('fDir').value; state.dirUrl = $('fDirUrl').value;
   state.listings = $('fListings').value; state.linkedin = $('fLinkedin').value;
   state.booking = $('fBooking').value;
+  state.community = $('fCommunity').value;
   state.instagram = $('fInstagram').value; state.whatsapp = $('fWhatsapp').value;
   state.foto = $('fFoto').value; state.logo = $('fLogo').value;
   state.certs = { crs: $('cCRS').checked, aei: $('cAEI').checked, realtor: $('cRealtor').checked, sr23: $('cSR23').checked, sr24: $('cSR24').checked, lux: $('cLux').checked };
   state.certLinks = { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value };
   state.customCerts = [...document.querySelectorAll('#customCerts .xlink')].map(r => { const i = r.querySelectorAll('input'); return { img: i[0].value, link: i[1].value }; }).filter(x => x.img || x.link);
-  state.vis = { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, listings: $('vListings').checked, booking: $('vBooking').checked, qr: $('vQr').checked, certs: $('vCerts').checked, legal: $('vLegal').checked };
+  state.vis = { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, listings: $('vListings').checked, booking: $('vBooking').checked, community: $('vCommunity').checked, qr: $('vQr').checked, certs: $('vCerts').checked, legal: $('vLegal').checked };
   state.legal = $('fLegal').value;
   document.querySelectorAll('#tplGrid .tpl').forEach(b => b.classList.toggle('active', b.dataset.tpl === state.tpl));
 }
-function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2600); }
+// Toast: semantic variants (ok / err / info) with a filled icon and aria-live.
+const TOAST_ICON = {
+  ok: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.2 14.6-4.3-4.3 1.4-1.4 2.9 2.9 5.4-5.4 1.4 1.4-6.8 6.8Z',
+  err: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z',
+  info: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z'
+};
+function toast(msg, kind = 'ok') {
+  const t = $('toast');
+  if (!t) return;
+  t.dataset.kind = kind;
+  const p = t.querySelector('path');
+  if (p) p.setAttribute('d', TOAST_ICON[kind] || TOAST_ICON.ok);
+  const tx = $('toastText');
+  if (tx) tx.textContent = msg; else t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
 // Visual confirmation on the copy buttons themselves (not only the toast).
 function flashCopied(btn) {
   if (!btn) return;
@@ -543,10 +735,10 @@ function blankAgent() {
   return {
     key: '', color: '#174176', name: '', role: '', zona: '', tel: '', email: '',
     web: 'canablue.com', dir: DIR_DEFAULT, dirUrl: MAPS_DEFAULT,
-    listings: '', booking: '', linkedin: '', instagram: '', whatsapp: '',
+    listings: '', booking: '', community: COMMUNITY_DEFAULT, linkedin: '', instagram: '', whatsapp: '',
     foto: '', logo: LOGO_DEFAULT,
     extra: [], tpl: 'principal',
-    vis: { foto: true, zona: true, social: true, listings: true, booking: true, qr: false, certs: true, legal: true },
+    vis: { foto: true, zona: true, social: true, listings: true, booking: true, community: true, qr: false, certs: true, legal: true },
     iconStyle: 'solid', certsAlign: 'center',
     certLinks: { crs: '', aei: '', realtor: '', sr23: '', sr24: '', lux: '' },
     customCerts: [],
@@ -584,6 +776,7 @@ async function loadSheetAgents(id) {
       dir: o.dir || DIR_DEFAULT, dirUrl: o.dirUrl || MAPS_DEFAULT,
       listings: o.listings || '', linkedin: o.linkedin || '',
       booking: o.booking || '',
+      community: o.community || '',
       instagram: o.instagram || '', whatsapp: o.whatsapp || '',
       foto: o.foto || '', logo: o.logo || '',
       vis: o.qr == null ? undefined : { qr: B(o.qr) },
@@ -630,12 +823,12 @@ function collectAgent(key) {
     key, color: $('fColor').value, name: $('fNombre').value, role: $('fCargo').value,
     zona: $('fZona').value, tel: $('fTel').value, email: $('fEmail').value, web: $('fWeb').value,
     dir: $('fDir').value, dirUrl: $('fDirUrl').value, listings: $('fListings').value,
-    booking: $('fBooking').value,
+    booking: $('fBooking').value, community: $('fCommunity').value,
     linkedin: $('fLinkedin').value, instagram: $('fInstagram').value, whatsapp: $('fWhatsapp').value,
     foto: $('fFoto').value, logo: $('fLogo').value,
     extra: [...document.querySelectorAll('#extraLinks .xlink-net')].map(r => ({ icon: r._icon || 'facebook', url: r.querySelector('input').value })).filter(e => e.url),
     tpl: state.tpl,
-    vis: { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, listings: $('vListings').checked, booking: $('vBooking').checked, qr: $('vQr').checked, certs: $('vCerts').checked, legal: $('vLegal').checked },
+    vis: { foto: $('vFoto').checked, zona: $('vZona').checked, social: $('vSocial').checked, listings: $('vListings').checked, booking: $('vBooking').checked, community: $('vCommunity').checked, qr: $('vQr').checked, certs: $('vCerts').checked, legal: $('vLegal').checked },
     iconStyle: state.iconStyle,
     certsAlign: state.certsAlign,
     certLinks: { crs: $('fLinkCRS').value, aei: $('fLinkAEI').value, realtor: $('fLinkRealtor').value, sr23: $('fLinkSR23').value, sr24: $('fLinkSR24').value, lux: $('fLinkLux').value },
@@ -651,6 +844,9 @@ function applyAgent(a) {
   $('fDir').value = a.dir || DIR_DEFAULT; $('fDirUrl').value = a.dirUrl || MAPS_DEFAULT;
   $('fListings').value = a.listings || ''; $('fLinkedin').value = a.linkedin || '';
   $('fBooking').value = a.booking || '';
+  // Legacy records have no community field: fall back to the default, but keep an
+  // explicitly cleared value (empty string) as empty.
+  $('fCommunity').value = a.community === undefined ? COMMUNITY_DEFAULT : a.community;
   $('fInstagram').value = a.instagram || ''; $('fWhatsapp').value = a.whatsapp || '';
   $('fFoto').value = a.foto || ''; if (a.logo) $('fLogo').value = a.logo;
   const ct = a.certs || {};
@@ -666,7 +862,7 @@ function applyAgent(a) {
   setCertsAlign(a.certsAlign || 'center');
   if (a.tpl) state.tpl = a.tpl;
   if (a.vis) {
-    const v = a.vis, box = { foto: 'vFoto', zona: 'vZona', social: 'vSocial', listings: 'vListings', booking: 'vBooking', qr: 'vQr', certs: 'vCerts', legal: 'vLegal' };
+    const v = a.vis, box = { foto: 'vFoto', zona: 'vZona', social: 'vSocial', listings: 'vListings', booking: 'vBooking', community: 'vCommunity', qr: 'vQr', certs: 'vCerts', legal: 'vLegal' };
     for (const k in box) { const el = $(box[k]); if (el && v[k] !== undefined) el.checked = !!v[k]; }
   }
   document.querySelectorAll('#customCerts .xlink').forEach(n => n.remove());
@@ -810,6 +1006,35 @@ function setViewport(vp) {
     b.setAttribute('aria-pressed', String(on));
   });
   try { localStorage.setItem(LS_VIEW, mobile ? 'mobile' : 'desktop'); } catch {}
+  fitPreview();
+}
+// Desktop preview: the signature keeps its real 600 px layout and is scaled down to
+// fit the box, so the preview shows the geometry the client will render (the mobile
+// preview does the opposite: it squeezes it, like a phone does).
+function fitPreview() {
+  const box = document.querySelector('.preview-box'), sig = $('sigPreview');
+  if (!box || !sig) return;
+  const table = sig.firstElementChild;
+  if (!table) return;
+  if (box.classList.contains('mobile')) {
+    table.style.position = ''; table.style.left = ''; table.style.top = '';
+    table.style.transform = ''; table.style.transformOrigin = ''; table.style.marginLeft = '';
+    table.style.width = '';
+    sig.style.height = '';
+    fitMobile();
+    return;
+  }
+  const avail = sig.clientWidth;
+  if (!avail) return;
+  const NAT = 600;
+  table.style.width = NAT + 'px';
+  const s = Math.min(1, avail / NAT);
+  table.style.position = 'absolute';
+  table.style.left = '0'; table.style.top = '0';
+  table.style.transformOrigin = 'top left';
+  table.style.transform = 'scale(' + s.toFixed(4) + ')';
+  table.style.marginLeft = Math.max(0, (avail - NAT * s) / 2) + 'px';
+  sig.style.height = Math.ceil(table.offsetHeight * s) + 2 + 'px';
 }
 function fitMobile() {
   const box = document.querySelector('.preview-box'), sig = $('sigPreview');
@@ -825,7 +1050,7 @@ function fitMobile() {
   return { zoom: table.style.zoom, natW, avail };
 }
 document.querySelectorAll('#vpSeg button').forEach(b => b.onclick = () => setViewport(b.dataset.vp));
-window.addEventListener('resize', () => { if (document.querySelector('.preview-box').classList.contains('mobile')) fitMobile(); });
+window.addEventListener('resize', fitPreview);
 try { setViewport(localStorage.getItem(LS_VIEW) === 'mobile' ? 'mobile' : 'desktop'); } catch { setViewport('desktop'); }
 
 document.querySelectorAll('#certsAlignSeg button').forEach(b => b.onclick = () => { setCertsAlign(b.dataset.a); markDirty(); });
@@ -834,9 +1059,16 @@ document.querySelectorAll('.rail button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.rail button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.editor .card').forEach(c => c.classList.toggle('show', c.id === b.dataset.sec));
 });
-document.querySelectorAll('#tplGrid .tpl').forEach(b => b.onclick = () => { state.tpl = b.dataset.tpl; markDirty(); });
+// Delegated: the thumbnails are rebuilt whenever a toggle changes, so per-button
+// handlers would be lost on every rebuild.
+$('tplGrid').addEventListener('click', e => {
+  const b = e.target.closest('.tpl');
+  if (!b) return;
+  state.tpl = b.dataset.tpl;
+  markDirty();
+});
 document.querySelectorAll('.swatches button').forEach(b => b.onclick = () => { $('fColor').value = b.dataset.c; markDirty(); });
-['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fBooking','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vBooking','vQr','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', markDirty));
+['fColor','fColorHex','fNombre','fCargo','fZona','fTel','fEmail','fWeb','fDir','fDirUrl','fListings','fBooking','fCommunity','fLinkedin','fInstagram','fWhatsapp','fFoto','fLogo','fLinkCRS','fLinkAEI','fLinkRealtor','fLinkSR23','fLinkSR24','fLinkLux','fLegal','cCRS','cAEI','cRealtor','cSR23','cSR24','cLux','vFoto','vZona','vSocial','vListings','vBooking','vCommunity','vQr','vCerts','vLegal'].forEach(id => $(id).addEventListener('input', markDirty));
 $('fColorHex').addEventListener('change', e => { if (/^#[0-9a-f]{6}$/i.test(e.target.value)) $('fColor').value = e.target.value; markDirty(); });
 $('fFotoFile').addEventListener('change', e => {
   const f = e.target.files[0]; if (!f) return;
